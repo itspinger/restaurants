@@ -2,6 +2,7 @@ package raf.rs.restaurants.userservice.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,8 @@ public class UserCreateDto {
 
     @Email
     private String email;
+
+    @NotBlank
+    private String dateOfBirth;
 
 }
