@@ -1,6 +1,8 @@
 package raf.rs.restaurants.userservice.controller;
 
 import java.util.List;
+
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> register(@RequestBody UserCreateDto userCreateDto) {
+    public ResponseEntity<UserDto> register(@RequestBody @Valid UserCreateDto userCreateDto) {
         return new ResponseEntity<>(this.userService.createUser(userCreateDto), HttpStatus.CREATED);
     }
 }
