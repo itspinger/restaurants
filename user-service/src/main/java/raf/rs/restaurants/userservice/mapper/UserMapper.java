@@ -1,21 +1,34 @@
 package raf.rs.restaurants.userservice.mapper;
 
 import java.sql.Date;
+
+import lombok.AllArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import raf.rs.restaurants.userservice.domain.Client;
+import raf.rs.restaurants.userservice.domain.Manager;
 import raf.rs.restaurants.userservice.domain.User;
+import raf.rs.restaurants.userservice.domain.UserType;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
 import raf.rs.restaurants.userservice.dto.UserDto;
-
+@AllArgsConstructor
 @Component
 public class UserMapper {
+    private final PasswordEncoder passwordEncoder;
+    public User createDtoToUser(UserCreateDto dto, UserType userType) {
+        User user=null;
+        if(userType == UserType.CLIENT) {
+             user = new Client();
+        } else {
+             user = new Manager();
+        }
 
-    public User createDtoToUser(UserCreateDto dto) {
-        final User user = new User();
         user.setEmail(dto.getEmail());
         System.out.println(dto.getDateOfBirth());
         user.setBirthDate(Date.valueOf(dto.getDateOfBirth()));
         user.setUsername(dto.getUsername());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         return user;
