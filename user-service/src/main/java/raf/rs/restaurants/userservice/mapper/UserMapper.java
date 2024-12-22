@@ -16,16 +16,16 @@ import raf.rs.restaurants.userservice.dto.UserDto;
 @Component
 public class UserMapper {
     private final PasswordEncoder passwordEncoder;
+
     public User createDtoToUser(UserCreateDto dto, UserType userType) {
-        User user=null;
-        if(userType == UserType.CLIENT) {
-             user = new Client();
+        User user = null;
+        if (userType == UserType.CLIENT) {
+            user = new Client();
         } else {
-             user = new Manager();
+            user = new Manager();
         }
 
         user.setEmail(dto.getEmail());
-        System.out.println(dto.getDateOfBirth());
         user.setBirthDate(Date.valueOf(dto.getDateOfBirth()));
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -41,6 +41,12 @@ public class UserMapper {
         userDto.setUsername(user.getUsername());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
+
+        if (user instanceof Client) {
+            Client client = (Client) user;
+            userDto.setReservationsNum(client.getReservations().size());  // Set the reservationsNum for Client
+        }
+
         return userDto;
     }
 
