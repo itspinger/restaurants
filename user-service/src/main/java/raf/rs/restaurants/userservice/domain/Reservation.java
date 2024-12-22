@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "reservation")
-@Inheritance
+
 @Getter
 @Setter
 @NoArgsConstructor

@@ -1,6 +1,6 @@
-package raf.rs.restaurants.userservice.domain;
+package raf.rs.restaurants.userservice.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,22 +8,19 @@ import lombok.Setter;
 
 import java.sql.Time;
 import java.util.Date;
-import java.util.Timer;
-
-@Entity
-@Table(name = "appointment")
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Appointment {
-    @Id
-    @GeneratedValue
+public class AppointmentDto {
     private Long id;
 
+    @NotNull
     private Date date;
+
+    @NotNull
     private Time time;
-    @ManyToOne
-    private Tables table;
+
+    @NotNull
+    private Long tableId;
 }

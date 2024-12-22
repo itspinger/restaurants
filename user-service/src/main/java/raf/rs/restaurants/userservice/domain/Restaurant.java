@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "restaurant")
-@Inheritance
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,7 +24,7 @@ public class Restaurant {
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant", orphanRemoval = true)
     private List<Tables> tables=new ArrayList<>();
-    private Integer tables_num=tables.size();//TODO ovde treba da se uzme nekako size od liste stolova msm treba u nekom set ili konstuktoru to da se stavi vrv ne moze ovako
+    private Integer tables_num;
     private String open_time;
     private String type;
 

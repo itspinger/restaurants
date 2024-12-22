@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "tables")
-@Inheritance
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +28,7 @@ public class Tables {
     private Restaurant restaurant;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "table", orphanRemoval = true)
     private List<Appointment> appointments=new ArrayList<>();
+    private Boolean isBlocked;
 
 
 
