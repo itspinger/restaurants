@@ -1,4 +1,4 @@
-package raf.rs.restaurants.userservice.domain;
+package raf.rs.notification.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,13 +10,13 @@ import java.sql.Date;
 import java.sql.Time;
 
 @Entity
-@Table(name = "notification")
+@Table(name = "notifications")
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notification {
+public class Notifications {
     @Id
     @GeneratedValue
     private Long id;

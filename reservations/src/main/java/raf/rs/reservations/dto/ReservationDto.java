@@ -1,4 +1,4 @@
-package raf.rs.restaurants.userservice.dto;
+package raf.rs.reservations.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,18 +12,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReservationDto {
     private Long id;
-
     @NotNull
     private Long appointmentId;
-
-    @NotNull
-    private Long clientId;
-
     private String note;
     @NotNull
-
     private boolean isActive;
-    @NotNull
 
-    private String declinedBy;
 }

@@ -42,10 +42,7 @@ public class UserMapper {
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
 
-        if (user instanceof Client) {
-            Client client = (Client) user;
-            userDto.setReservationsNum(client.getReservations().size());  // Set the reservationsNum for Client
-        }
+
 
         return userDto;
     }

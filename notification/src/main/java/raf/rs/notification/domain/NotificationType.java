@@ -1,11 +1,11 @@
-package raf.rs.restaurants.userservice.domain;
+package raf.rs.notification.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.checkerframework.common.aliasing.qual.Unique;
+
 
 @Entity
 @Table(name = "notification_type")

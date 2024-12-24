@@ -1,8 +1,9 @@
-package raf.rs.restaurants.userservice.mapper;
+package raf.rs.reservations.mapper;
 
-import raf.rs.restaurants.userservice.domain.Appointment;
-import raf.rs.restaurants.userservice.domain.Tables;
-import raf.rs.restaurants.userservice.dto.AppointmentDto;
+
+import raf.rs.reservations.domain.Appointment;
+import raf.rs.reservations.domain.Tables;
+import raf.rs.reservations.dto.AppointmentDto;
 
 public class AppointmentMapper {
 

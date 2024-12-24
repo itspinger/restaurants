@@ -1,4 +1,4 @@
-package raf.rs.restaurants.userservice.domain;
+package raf.rs.reservations.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,13 +21,10 @@ public class Reservation {
     @OneToOne
     private Appointment appointment;
 
-    @ManyToOne
-    private Client client;// ovo je moralo da bude zbog users tabele
-
     private String note;
 
     private boolean isActive;
 
-    private UserType declinedBy;
+    //treba nesto za ono koji user je otkazao
 
 }

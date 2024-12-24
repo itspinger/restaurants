@@ -22,8 +22,8 @@ import java.util.List;
 public class Client extends User {
 
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client", orphanRemoval = true)
-    private List<Reservation> reservations=new ArrayList<>();
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "client", orphanRemoval = true)
+    //private List<Reservation> reservations=new ArrayList<>();
     private Integer reservations_num;
     public Client(Long id, String username, String email, String password, String firstName, String lastName, Date birthDate, Integer reservations_num) {
         super(id, username, email, password, firstName, lastName, birthDate);

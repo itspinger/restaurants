@@ -1,8 +1,10 @@
-package raf.rs.restaurants.userservice.mapper;
+package raf.rs.reservations.mapper;
 
-import raf.rs.restaurants.userservice.domain.Restaurant;
-import raf.rs.restaurants.userservice.dto.RestaurantDto;
-import raf.rs.restaurants.userservice.dto.TablesDto;
+
+
+import raf.rs.reservations.domain.Restaurant;
+import raf.rs.reservations.dto.RestaurantDto;
+import raf.rs.reservations.dto.TablesDto;
 
 import java.util.List;
 

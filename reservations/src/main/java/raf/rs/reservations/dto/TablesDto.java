@@ -1,4 +1,4 @@
-package raf.rs.restaurants.userservice.dto;
+package raf.rs.reservations.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
