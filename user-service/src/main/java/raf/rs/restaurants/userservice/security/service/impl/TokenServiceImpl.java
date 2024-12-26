@@ -45,6 +45,7 @@ public class TokenServiceImpl implements TokenService {
         final Claims claims = parseToken(token);
         return claimsResolver.apply(claims);
     }
+
     @Override
     public String extractUsername(String jwt) {
         return extractClaim(jwt, (claims) -> claims.get("username", String.class));

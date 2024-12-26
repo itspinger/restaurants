@@ -9,7 +9,7 @@ import java.sql.Time;
 import java.util.Date;
 
 @Entity
-@Table(name = "appointment")
+@jakarta.persistence.Table(name = "appointment")
 
 @Getter
 @Setter
@@ -21,7 +21,9 @@ public class Appointment {
     private Long id;
 
     private Date date;
+
     private Time time;
+
     @ManyToOne
-    private Tables table;
+    private Table table;
 }

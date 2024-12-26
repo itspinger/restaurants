@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "restaurant")
+@jakarta.persistence.Table(name = "restaurant")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,10 +22,11 @@ public class Restaurant {
     private String address;
     private String description;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant", orphanRemoval = true)
-    private List<Tables> tables=new ArrayList<>();
-    private Integer tables_num;
+    private List<Table> tables=new ArrayList<>();
     private String open_time;
     private String type;
+    private int discountAfterXReservations;
+    private int freeItemEachXReservations;
 
 
 }

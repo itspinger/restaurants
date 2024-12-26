@@ -36,5 +36,9 @@ public class RestaurantDto {
     private String type;
 
     @NotNull
-    private List<TablesDto> tables;
+    private List<TableDto> tables;
+
+    private int discountAfterXReservations;
+
+    private int freeItemEachXReservations;
 }

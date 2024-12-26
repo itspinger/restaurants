@@ -2,7 +2,6 @@ package raf.rs.reservations.mapper;
 
 
 import raf.rs.reservations.domain.Appointment;
-import raf.rs.reservations.domain.Tables;
 import raf.rs.reservations.dto.AppointmentDto;
 
 public class AppointmentMapper {
@@ -11,16 +10,17 @@ public class AppointmentMapper {
         if (appointment == null) {
             return null;
         }
+
         return new AppointmentDto(
                 appointment.getId(),
                 appointment.getDate(),
                 appointment.getTime(),
-                appointment.getTable() != null ? appointment.getTable().getId() : null
+                appointment.getTable() != null ? TableMapper.toDTO(appointment.getTable()) : null
         );
     }
 
 
-    public static Appointment toEntity(AppointmentDto appointmentDTO, Tables table) {
+    public static Appointment toEntity(AppointmentDto appointmentDTO) {
         if (appointmentDTO == null) {
             return null;
         }
@@ -28,7 +28,7 @@ public class AppointmentMapper {
         appointment.setId(appointmentDTO.getId());
         appointment.setDate(appointmentDTO.getDate());
         appointment.setTime(appointmentDTO.getTime());
-        appointment.setTable(table);
+        appointment.setTable(TableMapper.toEntity(appointmentDTO.getTablesDto()));
         return appointment;
     }
 }

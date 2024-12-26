@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.transaction.Transactional;
 import java.util.List;
 
+import java.util.Optional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
 import raf.rs.restaurants.userservice.dto.UserDto;
+import raf.rs.restaurants.userservice.exception.NotFoundException;
 import raf.rs.restaurants.userservice.mapper.UserMapper;
 import raf.rs.restaurants.userservice.repository.UserRepository;
 import raf.rs.restaurants.userservice.security.service.TokenService;
@@ -36,9 +38,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> findAll() {
-        System.out.println(this.userRepository.findAll());
         return this.userRepository.findAll().stream().map(this.userMapper::createUserToUserDto).toList();
+    }
 
+    @Override
+    public UserDto findById(Long id) {
+        return this.userRepository.findById(id)
+            .map(this.userMapper::createUserToUserDto)
+            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
     }
 
     @Override

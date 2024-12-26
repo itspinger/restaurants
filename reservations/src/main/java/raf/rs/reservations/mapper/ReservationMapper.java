@@ -3,32 +3,31 @@ package raf.rs.reservations.mapper;
 
 import raf.rs.reservations.domain.Appointment;
 import raf.rs.reservations.domain.Reservation;
-import raf.rs.reservations.dto.ReservationDto;
+import raf.rs.reservations.dto.AppointmentDto;
+import raf.rs.reservations.dto.ReservationCreateDto;
 
 public class ReservationMapper {
-    public static ReservationDto toDTO(Reservation reservation) {
+
+    public static ReservationCreateDto toDTO(Reservation reservation) {
         if (reservation == null) {
             return null;
         }
-        return new ReservationDto(
+
+        return new ReservationCreateDto(
                 reservation.getId(),
-                reservation.getAppointment() != null ? reservation.getAppointment().getId() : null,
-                reservation.getNote(),
-                reservation.isActive()
+                reservation.getUserId(),
+                reservation.getAppointment() != null ? AppointmentMapper.toDTO(reservation.getAppointment()) : null
         );
     }
 
-    public static Reservation toEntity(ReservationDto reservationDTO, Appointment appointment) {
+    public static Reservation toEntity(ReservationCreateDto reservationDTO) {
         if (reservationDTO == null) {
             return null;
         }
-        Reservation reservation = new Reservation();
-        reservation.setId(reservationDTO.getId());
-        reservation.setAppointment(appointment);
 
-        reservation.setNote(reservationDTO.getNote());
-        reservation.setActive(reservationDTO.isActive());
-
+        final Reservation reservation = new Reservation();
+        reservation.setId(reservationDTO.getReservationId());
+        reservation.setAppointment(AppointmentMapper.toEntity());
         return reservation;
     }
 }

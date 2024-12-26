@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Manager extends User {
 
-    private String restaurantName;
+    private Long restaurantId;
     private Date startDate;
 
 }
