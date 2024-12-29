@@ -4,6 +4,24 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/notification" />
+        <option name="gradleJvm" value="21" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/notification" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/reservations" />
+        <option name="gradleJvm" value="21" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/reservations" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/user-service" />
         <option name="gradleJvm" value="21" />
         <option name="modules">

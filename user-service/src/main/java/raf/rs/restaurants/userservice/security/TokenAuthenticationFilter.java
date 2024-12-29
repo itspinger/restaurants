@@ -50,15 +50,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            final String userEmail = jwtService.extractUsername(jwt);
+            final String userEmail = this.jwtService.extractUsername(jwt);
             System.out.println(userEmail);
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                final UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                if (this.jwtService.isTokenValid(jwt, userDetails)) {
+                    final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
@@ -71,7 +71,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+            this.handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }
 }
