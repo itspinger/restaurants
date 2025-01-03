@@ -19,4 +19,7 @@ public interface UserService {
 
     TokenResponseDto login(TokenRequestDto tokenRequestDto);
 
+    void increaseReservationCount(Long id);
+
+    void decreaseReservationCount(Long id);
 }

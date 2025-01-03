@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,18 @@ public class UserController {
     @GetMapping
     public ResponseEntity<UserDto> getUser(@RequestParam Long id) {
         return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
+    }
+
+    @PostMapping("/increaseReservations/{id}")
+    public ResponseEntity<Void> increaseReservationCount(@PathVariable Long id) {
+        this.userService.increaseReservationCount(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/decreaseReservations/{id}")
+    public ResponseEntity<Void> decreaseReservationCount(@PathVariable Long id) {
+        this.userService.decreaseReservationCount(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/register/manager")

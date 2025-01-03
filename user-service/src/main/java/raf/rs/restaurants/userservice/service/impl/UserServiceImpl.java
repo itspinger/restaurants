@@ -9,12 +9,15 @@ import java.util.Optional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import raf.rs.restaurants.userservice.domain.Client;
+import raf.rs.restaurants.userservice.domain.Manager;
 import raf.rs.restaurants.userservice.domain.User;
 import raf.rs.restaurants.userservice.domain.UserType;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
 import raf.rs.restaurants.userservice.dto.UserDto;
+import raf.rs.restaurants.userservice.exception.NotClientException;
 import raf.rs.restaurants.userservice.exception.NotFoundException;
 import raf.rs.restaurants.userservice.mapper.UserMapper;
 import raf.rs.restaurants.userservice.repository.UserRepository;
@@ -57,12 +60,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public TokenResponseDto login(TokenRequestDto tokenRequestDto) {
-
         this.authenticatorManager.authenticate(new UsernamePasswordAuthenticationToken(tokenRequestDto.getUsername(), tokenRequestDto.getPassword()));
 
         final User user = this.userRepository.findByUsername(tokenRequestDto.getUsername()).or(()->this.userRepository.findByEmail(tokenRequestDto.getUsername())).orElseThrow();
-        Claims claims = Jwts.claims();
+
+        final Claims claims = Jwts.claims();
         claims.put("username", user.getUsername());
+        claims.put("userId", user.getId());
+        claims.put("roles", user.getAuthorities());
+
+        if (user instanceof Manager manager) {
+            claims.put("restaurantId", manager.getRestaurantId());
+        }
+
         return new TokenResponseDto(this.tokenService.generate(claims));
+    }
+
+    @Override
+    public void increaseReservationCount(Long id) {
+        final User user = this.userRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
+
+        if (!(user instanceof Client client)) {
+            throw new NotClientException("User with id %s is not a client".formatted(id));
+        }
+
+        client.setReservations_num(client.getReservations_num() + 1);
+        this.userRepository.save(user);
+    }
+
+    @Override
+    public void decreaseReservationCount(Long id) {
+        final User user = this.userRepository
+            .findById(id)
+            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
+
+        if (!(user instanceof Client client)) {
+            throw new NotClientException("User with id %s is not a client".formatted(id));
+        }
+
+        client.setReservations_num(client.getReservations_num() + 1);
+        this.userRepository.save(user);
     }
 }

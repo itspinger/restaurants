@@ -18,14 +18,15 @@ public class RestaurantMapper {
 
         // Return RestaurantDTO
         return new RestaurantDto(
-                restaurant.getId(),
-                restaurant.getName(),
-                restaurant.getAddress(),
-                restaurant.getDescription(),
-                tablesNum,
-                restaurant.getOpen_time(),
-                restaurant.getType(),
-                tableDTOs
+            restaurant.getId(),
+            restaurant.getName(),
+            restaurant.getAddress(),
+            restaurant.getDescription(),
+            restaurant.getOpen_time(),
+            restaurant.getType(),
+            tableDTOs,
+            0,
+            0
         );
     }
 

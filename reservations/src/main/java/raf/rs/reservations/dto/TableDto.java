@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import raf.rs.reservations.domain.Table;
 
 @Getter
 @Setter
@@ -19,9 +20,7 @@ public class TableDto {
     @Min(value = 1)
     private Integer capacity;
 
-    @NotNull
-    @Size(min = 3, max = 20)
-    private String zone;
+    private Table.Zone zone;
 
     private RestaurantDto restaurantDto;
 }

@@ -40,7 +40,7 @@ public class TokenServiceImpl implements TokenService {
         return claims;
     }
 
-
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = parseToken(token);
         return claimsResolver.apply(claims);

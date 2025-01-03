@@ -6,9 +6,14 @@ public class MessageBroker {
 
     public static void main(String[] args) throws Exception {
         final BrokerService broker = new BrokerService();
+
         // configure the broker
-        broker.addConnector("tcp://localhost:9876");
+        broker.addConnector("tcp://localhost:61616");
         broker.start();
+
+        while (true) {
+            Thread.sleep(Integer.MAX_VALUE);
+        }
     }
 
 }

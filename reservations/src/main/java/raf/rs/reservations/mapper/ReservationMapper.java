@@ -1,9 +1,6 @@
 package raf.rs.reservations.mapper;
 
-
-import raf.rs.reservations.domain.Appointment;
 import raf.rs.reservations.domain.Reservation;
-import raf.rs.reservations.dto.AppointmentDto;
 import raf.rs.reservations.dto.ReservationCreateDto;
 
 public class ReservationMapper {
@@ -27,7 +24,7 @@ public class ReservationMapper {
 
         final Reservation reservation = new Reservation();
         reservation.setId(reservationDTO.getReservationId());
-        reservation.setAppointment(AppointmentMapper.toEntity());
+        reservation.setAppointment(AppointmentMapper.toEntity(reservationDTO.getAppointment()));
         return reservation;
     }
 }

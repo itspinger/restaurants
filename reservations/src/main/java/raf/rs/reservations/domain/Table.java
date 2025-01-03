@@ -11,7 +11,6 @@ import java.util.List;
 
 @Entity
 @jakarta.persistence.Table(name = "tables")
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +21,7 @@ public class Table {
     private Long id;
 
     private Integer capacity;
-    private String zone; //mozda treba enum
+    private Zone zone; //mozda treba enum
 
     @ManyToOne
     private Restaurant restaurant;
@@ -30,4 +29,8 @@ public class Table {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "table", orphanRemoval = true)
     private List<Appointment> appointments=new ArrayList<>();
 
+    public enum Zone {
+        SMOKING,
+        NO_SMOKING
+    }
 }

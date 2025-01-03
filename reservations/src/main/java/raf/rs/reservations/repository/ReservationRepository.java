@@ -7,6 +7,6 @@ import raf.rs.reservations.domain.Reservation;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-
+    boolean existsByAppointment_Id(Long appointmentId);
 
 }

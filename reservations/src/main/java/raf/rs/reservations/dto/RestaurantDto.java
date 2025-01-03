@@ -26,9 +26,6 @@ public class RestaurantDto {
     private String description;
 
     @NotNull
-    private Integer tablesNum;
-
-    @NotNull
     private String openTime;
 
     @NotNull

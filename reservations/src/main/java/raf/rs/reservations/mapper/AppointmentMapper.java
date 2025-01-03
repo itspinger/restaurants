@@ -24,7 +24,7 @@ public class AppointmentMapper {
         if (appointmentDTO == null) {
             return null;
         }
-        Appointment appointment = new Appointment();
+        final Appointment appointment = new Appointment();
         appointment.setId(appointmentDTO.getId());
         appointment.setDate(appointmentDTO.getDate());
         appointment.setTime(appointmentDTO.getTime());

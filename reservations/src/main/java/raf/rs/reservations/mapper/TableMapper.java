@@ -24,7 +24,6 @@ public class TableMapper {
         table.setCapacity(dto.getCapacity());
         table.setZone(dto.getZone());
         table.setRestaurant(RestaurantMapper.toEntity(dto.getRestaurantDto()));
-
         return table;
     }
 
