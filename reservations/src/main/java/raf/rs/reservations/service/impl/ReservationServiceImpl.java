@@ -1,10 +1,13 @@
 package raf.rs.reservations.service.impl;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -22,17 +25,19 @@ import raf.rs.reservations.service.ReservationService;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
+    private final TaskScheduler scheduler;
     private final ReservationRepository reservationRepository;
     private final RestTemplate userServiceRestTemplate;
     private final JmsTemplate jmsTemplate;
     private final String destination;
 
     public ReservationServiceImpl(
-        ReservationRepository reservationRepository,
+        TaskScheduler scheduler, ReservationRepository reservationRepository,
         RestTemplate userServiceRestTemplate,
         JmsTemplate jmsTemplate,
         @Value("${destination.sendMail}") String destination
     ) {
+        this.scheduler = scheduler;
         this.reservationRepository = reservationRepository;
         this.userServiceRestTemplate = userServiceRestTemplate;
         this.jmsTemplate = jmsTemplate;
@@ -52,14 +57,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new AlreadyExistsException("Reservation already exists");
         }
 
-        final ResponseEntity<UserDto> responseEntity;
-        try {
-            responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(reservationCreateDto.getUserId()), HttpMethod.GET, null, UserDto.class);
-        } catch (HttpClientErrorException e) {
-            throw new NotFoundException("Failed to retrieve user by id %s".formatted(reservationCreateDto.getUserId()));
-        }
-
-        final UserDto userDto = responseEntity.getBody();
+        final UserDto userDto = this.findById(reservationCreateDto.getUserId());
         if (userDto == null) {
             throw new NotFoundException("Failed to retrieve user by id %s".formatted(reservationCreateDto.getUserId()));
         }
@@ -69,7 +67,9 @@ public class ReservationServiceImpl implements ReservationService {
         final boolean benefits = this.hasAppliedBenefits(userDto.getReservationsNum(), restaurantDto);
 
         this.reservationRepository.save(reservation);
-        this.sendNotifications(userDto, benefits, restaurantDto, appointment);
+
+        final UserDto managerDto = this.findByRestaurantId(restaurantDto.getId());
+        this.sendNotifications(userDto, managerDto, benefits, restaurantDto, appointment);
 
         // After the reservation was saved we need to increase
         // The reservation count for the user
@@ -78,11 +78,41 @@ public class ReservationServiceImpl implements ReservationService {
         } catch (HttpClientErrorException e) {
             throw new NotFoundException("Failed to increase reservation count for user " + e.getMessage());
         }
+
+        this.scheduleReminder(userDto, reservation);
+    }
+
+    private void scheduleReminder(UserDto userDto, Reservation reservation) {
+        final LocalDateTime scheduledTime = reservation.getAppointment().getTime();
+        final LocalDateTime reminderTime = scheduledTime.minusHours(1);
+        final Instant reminderInstant = reminderTime.atZone(ZoneId.systemDefault()).toInstant();
+
+        // Trenutno vreme je LocalDateTime.now()
+        // Ako je reminderTime after LocalDateTime.now()
+        // Onda zakazati, u suprotnom ne raditi nista
+        if (reminderTime.isAfter(LocalDateTime.now())) {
+            this.scheduler.schedule(() -> {
+                final NotificationRequestDto requestDto = NotificationRequestDto.of(
+                    "Reservation Reminder",
+                    userDto.getEmail(),
+                    userDto.getFirstName(),
+                    reservation.getAppointment().getTable().getId()
+                );
+
+                this.jmsTemplate.convertAndSend(this.destination, requestDto);
+            }, reminderInstant);
+        }
     }
 
     @Override
     public void cancelReservation(Long reservationId, boolean userCancelled) {
         final Reservation reservation = this.findReservationById(reservationId);
+
+        final Long userId = reservation.getUserId();
+        final Long restaurantId = reservation.getAppointment().getTable().getRestaurant().getId();
+
+        final UserDto clientDto = this.findById(userId);
+        final UserDto managerDto = this.findByRestaurantId(restaurantId);
 
         this.reservationRepository.delete(reservation);
 
@@ -92,14 +122,14 @@ public class ReservationServiceImpl implements ReservationService {
         if (userCancelled) {
             // If manager cancelled, synchronously contact the user service to decrease the reservation number
             try {
-                this.userServiceRestTemplate.exchange("/user/decreaseReservations/%s".formatted(reservationId), HttpMethod.POST, null, Void.class);
+                this.userServiceRestTemplate.exchange("/user/decreaseReservations/%s".formatted(userId), HttpMethod.POST, null, Void.class);
             } catch (HttpClientErrorException e) {
                 throw new NotFoundException("Failed to decrease reservation count for user " + e.getMessage());
             }
 
             final NotificationRequestDto managerMesage = NotificationRequestDto.of(
                 "Client cancelled a reservation",
-                "",
+                managerDto.getEmail(),
                 reservation.getAppointment().getTime(),
                 reservation.getAppointment().getTable().getId()
             );
@@ -110,7 +140,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         final NotificationRequestDto clientMessage = NotificationRequestDto.of(
             "Manager cancelled your reservation",
-            "",
+            clientDto.getEmail(),
             reservation.getAppointment().getTime(),
             reservation.getAppointment().getTable().getId()
         );
@@ -122,7 +152,7 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationCount >= restaurantDto.getDiscountAfterXReservations() || restaurantDto.getFreeItemEachXReservations() % reservationCount == 0;
     }
 
-    private void sendNotifications(UserDto dto, boolean benefits, RestaurantDto restaurantDto, AppointmentDto appointmentDto) {
+    private void sendNotifications(UserDto dto, UserDto managerDto, boolean benefits, RestaurantDto restaurantDto, AppointmentDto appointmentDto) {
         if (benefits) {
             final NotificationRequestDto clientMessage = NotificationRequestDto.of(
                 "Reservation Confirmed (With Benefits)",
@@ -134,7 +164,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             final NotificationRequestDto managerMessage = NotificationRequestDto.of(
                 "Client created a reservation with benefits",
-                "",
+                managerDto.getEmail(),
                 LocalDateTime.now(),
                 appointmentDto.getTablesDto().getId()
             );
@@ -154,12 +184,46 @@ public class ReservationServiceImpl implements ReservationService {
 
         final NotificationRequestDto managerMessage = NotificationRequestDto.of(
             "Client created a reservation",
-            "",
+            managerDto.getEmail(),
             LocalDateTime.now(),
             appointmentDto.getTablesDto().getId()
         );
 
         this.jmsTemplate.convertAndSend(this.destination, clientMessage);
         this.jmsTemplate.convertAndSend(this.destination, managerMessage);
+    }
+
+    private String findUserEmail(Long userId) {
+        return this.findById(userId).getEmail();
+    }
+
+    private UserDto findById(Long userId) {
+        final ResponseEntity<UserDto> responseEntity;
+        try {
+            responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(userId), HttpMethod.GET, null, UserDto.class);
+        } catch (HttpClientErrorException e) {
+            throw new NotFoundException("Failed to retrieve user by id %s".formatted(userId));
+        }
+
+        if (responseEntity.getBody() == null) {
+            throw new NotFoundException("Failed to retrieve user by id %s".formatted(userId));
+        }
+
+        return responseEntity.getBody();
+    }
+
+    private UserDto findByRestaurantId(Long restaurantId) {
+        final ResponseEntity<UserDto> responseEntity;
+        try {
+            responseEntity = this.userServiceRestTemplate.exchange("/user/manager/%s".formatted(restaurantId), HttpMethod.GET, null, UserDto.class);
+        } catch (HttpClientErrorException e) {
+            throw new NotFoundException("Failed to manager of restaurant %s".formatted(restaurantId));
+        }
+
+        if (responseEntity.getBody() == null) {
+            throw new NotFoundException("Failed to manager of restaurant %s".formatted(restaurantId));
+        }
+
+        return responseEntity.getBody();
     }
 }

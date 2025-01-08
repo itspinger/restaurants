@@ -27,7 +27,7 @@ public class Table {
     private Restaurant restaurant;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "table", orphanRemoval = true)
-    private List<Appointment> appointments=new ArrayList<>();
+    private List<Appointment> appointments = new ArrayList<>();
 
     public enum Zone {
         SMOKING,

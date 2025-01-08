@@ -3,6 +3,7 @@ package raf.rs.restaurants.userservice.service;
 import java.util.List;
 
 import java.util.Optional;
+import org.springframework.http.HttpStatusCode;
 import raf.rs.restaurants.userservice.domain.UserType;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
@@ -22,4 +23,6 @@ public interface UserService {
     void increaseReservationCount(Long id);
 
     void decreaseReservationCount(Long id);
+
+    UserDto findManagerByRestaurantId(Long restaurantId);
 }

@@ -1,5 +1,6 @@
 package raf.rs.reservations.domain;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,6 @@ import java.util.Date;
 
 @Entity
 @jakarta.persistence.Table(name = "appointment")
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +22,7 @@ public class Appointment {
 
     private Date date;
 
-    private Time time;
+    private LocalDateTime time;
 
     @ManyToOne
     private Table table;

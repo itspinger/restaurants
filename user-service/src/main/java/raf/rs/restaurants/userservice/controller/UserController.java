@@ -45,6 +45,11 @@ public class UserController {
         return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/manager/{restaurantId}")
+    public ResponseEntity<UserDto> getManagerByRestaurantId(@PathVariable Long restaurantId) {
+        return new ResponseEntity<>(this.userService.findManagerByRestaurantId(restaurantId), HttpStatus.OK);
+    }
+
     @PostMapping("/increaseReservations/{id}")
     public ResponseEntity<Void> increaseReservationCount(@PathVariable Long id) {
         this.userService.increaseReservationCount(id);

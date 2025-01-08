@@ -1,20 +1,25 @@
 package raf.rs.notification.runner;
 
+import java.time.LocalDateTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import raf.rs.notification.domain.Notification;
 import raf.rs.notification.domain.NotificationType;
 import raf.rs.notification.repository.NotificationTypeRepository;
-import raf.rs.notification.service.EmailService;
+import raf.rs.notification.service.NotificationService;
+import raf.rs.notification.service.NotificationTypeService;
 
 @Profile({"default"})
 @Component
 public class TestDataRunner implements CommandLineRunner {
-    private final EmailService emailService;
+    private final NotificationService notificationService;
+    private final NotificationTypeService notificationTypeService;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    public TestDataRunner(EmailService emailService, NotificationTypeRepository notificationTypeRepository) {
-        this.emailService = emailService;
+    public TestDataRunner(NotificationService notificationService, NotificationTypeService notificationTypeService, NotificationTypeRepository notificationTypeRepository) {
+        this.notificationService = notificationService;
+        this.notificationTypeService = notificationTypeService;
         this.notificationTypeRepository = notificationTypeRepository;
     }
 
@@ -28,7 +33,7 @@ public class TestDataRunner implements CommandLineRunner {
         this.createType("Reservation Confirmed (With Benefits)", "Hello %s, we're mailing you to confirm your reservation for restaurant %s at time %s and table %s");
         this.createType("Client cancelled a reservation", "Hello, a user has just cancelled their reservation for table %s at time %s");
         this.createType("Manager cancelled your reservation", "We're sorry to inform you that the manager has cancelled your reservation for table %s at time %s");
-        this.createType("Reservation Reminder", "Hello %s, we're mailing you to remind you that you have a reservation in an hour for restaurant %s at table %s");
+        this.createType("Reservation Reminder", "Hello %s, we're mailing you to remind you that you have a reservation in an hour at table %s");
         this.sendMail();
     }
 
@@ -40,6 +45,14 @@ public class TestDataRunner implements CommandLineRunner {
     }
 
     private void sendMail() {
-        this.emailService.sendMessage("avelickovic8823rn@raf.rs", "cao", "cao");
+        NotificationType mailActivation = this.notificationTypeService.findByName("Mail Activation");
+
+        final Notification notification = new Notification();
+        notification.setEmail("avelickovic8823rn@raf.rs");
+        notification.setTimestamp(LocalDateTime.now());
+        notification.setNotificationType(mailActivation);
+        notification.setText(mailActivation.getText());
+
+        this.notificationService.sendNotification(notification);
     }
 }

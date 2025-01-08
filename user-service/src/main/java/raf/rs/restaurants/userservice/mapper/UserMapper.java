@@ -21,6 +21,7 @@ public class UserMapper {
         User user = null;
         if (userType == UserType.CLIENT) {
             user = new Client();
+            ((Client) user).setReservations_num(0);
         } else {
             user = new Manager();
         }
@@ -28,7 +29,7 @@ public class UserMapper {
         user.setEmail(dto.getEmail());
         user.setBirthDate(Date.valueOf(dto.getDateOfBirth()));
         user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setPassword(this.passwordEncoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         return user;
@@ -41,6 +42,13 @@ public class UserMapper {
         userDto.setUsername(user.getUsername());
         userDto.setFirstName(user.getFirstName());
         userDto.setLastName(user.getLastName());
+        if (user instanceof Manager manager) {
+            userDto.setRestaurantId(manager.getRestaurantId());
+            userDto.setStartDate(manager.getStartDate());
+        }
+        if (user instanceof Client client) {
+            userDto.setReservationsNum(client.getReservations_num());
+        }
         return userDto;
     }
 

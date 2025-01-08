@@ -54,6 +54,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserCreateDto userCreateDto, UserType userType) {
         final User newUser = this.userMapper.createDtoToUser(userCreateDto, userType);
+        if (userType == UserType.MANAGER) {
+            ((Manager) newUser).setRestaurantId(1L);
+        }
         this.userRepository.save(newUser);
         return this.userMapper.createUserToUserDto(newUser);
     }
@@ -100,7 +103,15 @@ public class UserServiceImpl implements UserService {
             throw new NotClientException("User with id %s is not a client".formatted(id));
         }
 
-        client.setReservations_num(client.getReservations_num() + 1);
+        client.setReservations_num(client.getReservations_num() - 1);
         this.userRepository.save(user);
+    }
+
+    @Override
+    public UserDto findManagerByRestaurantId(Long restaurantId) {
+        return this.userRepository
+            .findByRestaurantId(restaurantId)
+            .map(this.userMapper::createUserToUserDto)
+            .orElseThrow(() -> new NotFoundException("User with restaurant id %s not found".formatted(restaurantId)));
     }
 }
