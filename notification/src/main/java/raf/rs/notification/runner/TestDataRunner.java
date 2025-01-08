@@ -5,13 +5,16 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import raf.rs.notification.domain.NotificationType;
 import raf.rs.notification.repository.NotificationTypeRepository;
+import raf.rs.notification.service.EmailService;
 
 @Profile({"default"})
 @Component
 public class TestDataRunner implements CommandLineRunner {
+    private final EmailService emailService;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    public TestDataRunner(NotificationTypeRepository notificationTypeRepository) {
+    public TestDataRunner(EmailService emailService, NotificationTypeRepository notificationTypeRepository) {
+        this.emailService = emailService;
         this.notificationTypeRepository = notificationTypeRepository;
     }
 
@@ -26,6 +29,7 @@ public class TestDataRunner implements CommandLineRunner {
         this.createType("Client cancelled a reservation", "Hello, a user has just cancelled their reservation for table %s at time %s");
         this.createType("Manager cancelled your reservation", "We're sorry to inform you that the manager has cancelled your reservation for table %s at time %s");
         this.createType("Reservation Reminder", "Hello %s, we're mailing you to remind you that you have a reservation in an hour for restaurant %s at table %s");
+        this.sendMail();
     }
 
     private void createType(String name, String text) {
@@ -33,5 +37,9 @@ public class TestDataRunner implements CommandLineRunner {
         notificationType.setName(name);
         notificationType.setText(text);
         this.notificationTypeRepository.save(notificationType);
+    }
+
+    private void sendMail() {
+        this.emailService.sendMessage("avelickovic8823rn@raf.rs", "cao", "cao");
     }
 }
