@@ -40,8 +40,8 @@ public class UserController {
         return new ResponseEntity<>(this.userService.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<UserDto> getUser(@RequestParam Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
         return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
     }
 

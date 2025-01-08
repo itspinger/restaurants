@@ -16,7 +16,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendMessage(String to, String subject, String body) {
         final SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("noreply@");
+        message.setFrom("noreply@raf.rs");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);

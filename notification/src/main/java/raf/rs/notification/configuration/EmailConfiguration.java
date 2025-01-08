@@ -15,7 +15,7 @@ public class EmailConfiguration {
         sender.setHost("smtp.gmail.com");
         sender.setPort(587);
 
-        sender.setUsername("skomponente22@gmail.com");
+        sender.setUsername("noreply@example.com");
         sender.setPassword("softverskek22");
 
         final Properties props = sender.getJavaMailProperties();

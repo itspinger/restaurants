@@ -22,16 +22,16 @@ public class TokenServiceImpl implements TokenService {
     public String generate(Claims claims) {
         return Jwts.builder()
                 .setClaims(claims)
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
+                .signWith(SignatureAlgorithm.HS256, this.jwtSecret)
                 .compact();
     }
 
     @Override
     public Claims parseToken(String jwt) {
-        Claims claims;
+        final Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(jwtSecret)
+                    .setSigningKey(this.jwtSecret)
                     .parseClaimsJws(jwt)
                     .getBody();
         } catch (Exception e) {
@@ -40,20 +40,19 @@ public class TokenServiceImpl implements TokenService {
         return claims;
     }
 
-    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = parseToken(token);
+        final Claims claims = this.parseToken(token);
         return claimsResolver.apply(claims);
     }
 
     @Override
     public String extractUsername(String jwt) {
-        return extractClaim(jwt, (claims) -> claims.get("username", String.class));
+        return this.extractClaim(jwt, (claims) -> claims.get("username", String.class));
     }
 
     @Override
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
-        final String username = extractUsername(jwt);
+        final String username = this.extractUsername(jwt);
         return (username.equals(userDetails.getUsername()));
     }
 }
