@@ -19,7 +19,7 @@ import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 import "./assets/style.css";
 
 // Set the default base url for the API
-axios.defaults.baseURL = 'https://raf-pixeldraw.aarsen.me/api/';
+axios.defaults.baseURL = 'http://localhost:8084';
 
 const vuetify = createVuetify({
     components,

@@ -1,6 +1,10 @@
 package raf.rs.restaurants.userservice.exception;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -11,9 +15,20 @@ public class ControllerErrorHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<?> handleCustomException(CustomException exception) {
-        //Create error details object based on exception fields
-        ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage(), Instant.now());
-        //Return error details and map http status from exception
+        final ErrorDetails errorDetails = new ErrorDetails(exception.getErrorCode(), exception.getMessage(), Instant.now());
         return new ResponseEntity<>(errorDetails, exception.getHttpStatus());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        final Map<String, String> errors = new HashMap<>();
+        exception.getBindingResult().getAllErrors().forEach(error -> {
+            final String fieldName = ((FieldError) error).getField();
+            final String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        final ErrorDetails error = new ErrorDetails(ErrorCode.INVALID_DATA, "Validation failed for one or more fields", Instant.now(), errors);
+        return new ResponseEntity<>(error, exception.getStatusCode());
     }
 }

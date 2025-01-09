@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 
 public class NotClientException extends CustomException {
 
-    public NotClientException(String message) {
-        super(message, ErrorCode.NOT_CLIENT, HttpStatus.FORBIDDEN);
+    public NotClientException() {
+        super("This user is not a client", ErrorCode.NOT_CLIENT, HttpStatus.FORBIDDEN);
     }
 
 }

@@ -2,9 +2,7 @@ package raf.rs.restaurants.userservice.service;
 
 import java.util.List;
 
-import java.util.Optional;
-import org.springframework.http.HttpStatusCode;
-import raf.rs.restaurants.userservice.domain.UserType;
+import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
@@ -16,7 +14,9 @@ public interface UserService {
 
     UserDto findById(Long id);
 
-    UserDto createUser(UserCreateDto userCreateDto, UserType userType);
+    UserDto createClient(UserCreateDto userCreateDto);
+
+    UserDto createManager(UserCreateDto userCreateDto);
 
     TokenResponseDto login(TokenRequestDto tokenRequestDto);
 
@@ -25,4 +25,6 @@ public interface UserService {
     void decreaseReservationCount(Long id);
 
     UserDto findManagerByRestaurantId(Long restaurantId);
+
+    SuccessMessageDto validateVerificationToken(String token);
 }

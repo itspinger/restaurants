@@ -41,6 +41,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-activemq")
     compileOnly("org.projectlombok:lombok")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
     annotationProcessor("org.projectlombok:lombok")
@@ -48,6 +49,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation ("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
+    implementation("org.modelmapper:modelmapper:3.2.0")
 }
 
 tasks.withType<Test> {

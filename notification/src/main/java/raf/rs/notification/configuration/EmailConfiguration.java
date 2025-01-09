@@ -29,5 +29,4 @@ public class EmailConfiguration {
         props.put("mail.debug", "true");
         return sender;
     }
-
 }

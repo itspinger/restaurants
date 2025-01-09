@@ -1,6 +1,8 @@
 package raf.rs.restaurants.userservice.exception;
 
 public enum ErrorCode {
-    RESOURCE_NOT_FOUND,
-    NOT_CLIENT
+    NOT_FOUND,
+    INVALID_DATA,
+    NOT_CLIENT,
+    ALREADY_EXISTS
 }

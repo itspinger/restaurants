@@ -47,7 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
         this.emailService.sendMessage(
             notification.getEmail(),
             notification.getNotificationType().getName(),
-            notification.getNotificationType().getText()
+            notification.getText()
         );
 
         this.repository.save(notification);

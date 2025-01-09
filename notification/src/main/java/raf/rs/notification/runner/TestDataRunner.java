@@ -25,7 +25,7 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        this.createType("Mail Activation", "Hello %s, please active your account by visiting the following link %s");
+        this.createType("Email Verification", "Hello %s, please active your account by visiting the following link %s");
         this.createType("Password Reset", "Hello %s, you can change your password on this link %s");
         this.createType("Client created a reservation", "Hello, a user has just created a reservation at %s time and table %s");
         this.createType("Client created a reservation with benefits", "Hello, a user has just created a reservation at %s time and table %s with benefits");
@@ -34,7 +34,6 @@ public class TestDataRunner implements CommandLineRunner {
         this.createType("Client cancelled a reservation", "Hello, a user has just cancelled their reservation for table %s at time %s");
         this.createType("Manager cancelled your reservation", "We're sorry to inform you that the manager has cancelled your reservation for table %s at time %s");
         this.createType("Reservation Reminder", "Hello %s, we're mailing you to remind you that you have a reservation in an hour at table %s");
-        this.sendMail();
     }
 
     private void createType(String name, String text) {
@@ -45,7 +44,7 @@ public class TestDataRunner implements CommandLineRunner {
     }
 
     private void sendMail() {
-        NotificationType mailActivation = this.notificationTypeService.findByName("Mail Activation");
+        NotificationType mailActivation = this.notificationTypeService.findByName("Email Verification");
 
         final Notification notification = new Notification();
         notification.setEmail("avelickovic8823rn@raf.rs");

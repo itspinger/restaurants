@@ -21,13 +21,12 @@ import java.util.List;
 public class SecurityConfig  {
     private final AuthenticationProvider authenticationProvider;
     private final TokenAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationError customAuthenticationError;
 
-    public SecurityConfig(
-            TokenAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider
-    ) {
+    public SecurityConfig(TokenAuthenticationFilter jwtAuthenticationFilter, AuthenticationProvider authenticationProvider, CustomAuthenticationError customAuthenticationError) {
         this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customAuthenticationError = customAuthenticationError;
     }
 
     @Bean
@@ -35,16 +34,19 @@ public class SecurityConfig  {
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/user/register/**", "/user/login")
+                .requestMatchers("/client/register", "/manager/register", "/user/login", "/verify-email")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(this.customAuthenticationError)
+                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(this.authenticationProvider)
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

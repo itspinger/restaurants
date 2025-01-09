@@ -15,8 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -38,10 +38,18 @@ public class User implements UserDetails {
     @Column(unique=true)
     private String email;
 
+    @ColumnDefault("false")
+    private boolean activated;
+
     private String password;
+
     private String firstName;
+
     private String lastName;
+
     private Date birthDate;
+
+    private String verificationToken;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

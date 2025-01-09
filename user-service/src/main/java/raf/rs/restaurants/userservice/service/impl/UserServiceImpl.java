@@ -6,20 +6,28 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.UUID;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import raf.rs.restaurants.userservice.client.notificationservice.dto.NotificationRequestDto;
 import raf.rs.restaurants.userservice.domain.Client;
 import raf.rs.restaurants.userservice.domain.Manager;
 import raf.rs.restaurants.userservice.domain.User;
-import raf.rs.restaurants.userservice.domain.UserType;
+import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
 import raf.rs.restaurants.userservice.dto.UserDto;
+import raf.rs.restaurants.userservice.exception.DuplicateUserException;
+import raf.rs.restaurants.userservice.exception.IncorrectCredentialsException;
 import raf.rs.restaurants.userservice.exception.NotClientException;
 import raf.rs.restaurants.userservice.exception.NotFoundException;
-import raf.rs.restaurants.userservice.mapper.UserMapper;
+import raf.rs.restaurants.userservice.repository.ManagerRepository;
 import raf.rs.restaurants.userservice.repository.UserRepository;
 import raf.rs.restaurants.userservice.security.service.TokenService;
 import raf.rs.restaurants.userservice.service.UserService;
@@ -27,45 +35,88 @@ import raf.rs.restaurants.userservice.service.UserService;
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
+    private final ModelMapper modelMapper;
+    private final ManagerRepository managerRepository;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final AuthenticationManager authenticatorManager;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
+    private final JmsTemplate jmsTemplate;
+    private final String destination;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, AuthenticationManager authenticatorManager, TokenService tokenService) {
+    public UserServiceImpl(
+        ModelMapper modelMapper,
+        ManagerRepository managerRepository,
+        UserRepository userRepository,
+        AuthenticationManager authenticatorManager,
+        TokenService tokenService,
+        PasswordEncoder passwordEncoder,
+        JmsTemplate jmsTemplate,
+        @Value("${destination.sendMail}") String destination
+    ) {
+        this.modelMapper = modelMapper;
+        this.managerRepository = managerRepository;
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
         this.authenticatorManager = authenticatorManager;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
+        this.jmsTemplate = jmsTemplate;
+        this.destination = destination;
     }
 
     @Override
     public List<UserDto> findAll() {
-        return this.userRepository.findAll().stream().map(this.userMapper::createUserToUserDto).toList();
+        return this.userRepository.findAll()
+            .stream()
+            .map((user) -> this.modelMapper.map(user, UserDto.class))
+            .toList();
     }
 
     @Override
     public UserDto findById(Long id) {
         return this.userRepository.findById(id)
-            .map(this.userMapper::createUserToUserDto)
-            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
+            .map((user) -> this.modelMapper.map(user, UserDto.class))
+            .orElseThrow(() -> new NotFoundException("User does not exist"));
     }
 
     @Override
-    public UserDto createUser(UserCreateDto userCreateDto, UserType userType) {
-        final User newUser = this.userMapper.createDtoToUser(userCreateDto, userType);
-        if (userType == UserType.MANAGER) {
-            ((Manager) newUser).setRestaurantId(1L);
-        }
-        this.userRepository.save(newUser);
-        return this.userMapper.createUserToUserDto(newUser);
+    public UserDto createClient(UserCreateDto userCreateDto) {
+        this.checkExists(userCreateDto);
+
+        final Client client = this.modelMapper.map(userCreateDto, Client.class);
+        final String token = UUID.randomUUID().toString();
+        client.setPassword(this.passwordEncoder.encode(userCreateDto.getPassword()));
+        client.setVerificationToken(token);
+
+        this.userRepository.save(client);
+        this.sendVerificationEmail(client);
+
+        return this.modelMapper.map(client, UserDto.class);
     }
 
     @Override
-    public TokenResponseDto login(TokenRequestDto tokenRequestDto) {
-        this.authenticatorManager.authenticate(new UsernamePasswordAuthenticationToken(tokenRequestDto.getUsername(), tokenRequestDto.getPassword()));
+    public UserDto createManager(UserCreateDto userCreateDto) {
+        this.checkExists(userCreateDto);
 
-        final User user = this.userRepository.findByUsername(tokenRequestDto.getUsername()).or(()->this.userRepository.findByEmail(tokenRequestDto.getUsername())).orElseThrow();
+        final Manager manager = this.modelMapper.map(userCreateDto, Manager.class);
+        final String token = UUID.randomUUID().toString();
+        manager.setPassword(this.passwordEncoder.encode(userCreateDto.getPassword()));
+        manager.setVerificationToken(token);
+
+        this.userRepository.save(manager);
+        this.sendVerificationEmail(manager);
+
+        return this.modelMapper.map(manager, UserDto.class);
+    }
+
+    @Override
+    public TokenResponseDto login(TokenRequestDto request) {
+        this.authenticatorManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+
+        final User user = this.userRepository
+            .findByUsername(request.getUsername())
+            .or(() -> this.userRepository.findByEmail(request.getUsername()))
+            .orElseThrow(IncorrectCredentialsException::new);
 
         final Claims claims = Jwts.claims();
         claims.put("username", user.getUsername());
@@ -83,13 +134,13 @@ public class UserServiceImpl implements UserService {
     public void increaseReservationCount(Long id) {
         final User user = this.userRepository
             .findById(id)
-            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
+            .orElseThrow(() -> new NotFoundException("User does not exist"));
 
         if (!(user instanceof Client client)) {
-            throw new NotClientException("User with id %s is not a client".formatted(id));
+            throw new NotClientException();
         }
 
-        client.setReservations_num(client.getReservations_num() + 1);
+        client.setReservationCount(client.getReservationCount() + 1);
         this.userRepository.save(user);
     }
 
@@ -97,21 +148,53 @@ public class UserServiceImpl implements UserService {
     public void decreaseReservationCount(Long id) {
         final User user = this.userRepository
             .findById(id)
-            .orElseThrow(() -> new NotFoundException("User with id %s not found".formatted(id)));
+            .orElseThrow(() -> new NotFoundException("User does not exist"));
 
         if (!(user instanceof Client client)) {
-            throw new NotClientException("User with id %s is not a client".formatted(id));
+            throw new NotClientException();
         }
 
-        client.setReservations_num(client.getReservations_num() - 1);
+        client.setReservationCount(client.getReservationCount() - 1);
         this.userRepository.save(user);
     }
 
     @Override
     public UserDto findManagerByRestaurantId(Long restaurantId) {
-        return this.userRepository
+        return this.managerRepository
             .findByRestaurantId(restaurantId)
-            .map(this.userMapper::createUserToUserDto)
-            .orElseThrow(() -> new NotFoundException("User with restaurant id %s not found".formatted(restaurantId)));
+            .map(user -> this.modelMapper.map(user, UserDto.class))
+            .orElseThrow(() -> new NotFoundException("User does not exist"));
+    }
+
+    @Override
+    public SuccessMessageDto validateVerificationToken(String token) {
+        final Optional<User> valid = this.userRepository.findByVerificationToken(token);
+        if (valid.isEmpty()) {
+            throw new NotFoundException("Verification token does not exist");
+        }
+
+        final User user = valid.get();
+        user.setActivated(true);
+        user.setVerificationToken(null);
+        this.userRepository.save(user);
+        return SuccessMessageDto.success("Successfully verified your email!");
+    }
+
+    private void sendVerificationEmail(User user) {
+        final NotificationRequestDto dto = NotificationRequestDto.of(
+            "Email Verification",
+            user.getEmail(),
+            user.getUsername(),
+            "http://localhost:8084/user-service/api/verify-email?token=%s".formatted(user.getVerificationToken())
+        );
+
+        this.jmsTemplate.convertAndSend(this.destination, dto);
+    }
+
+    private void checkExists(UserCreateDto dto) {
+        final boolean invalid = this.userRepository.existsByUsername(dto.getUsername()) || this.userRepository.existsByEmail(dto.getEmail());
+        if (invalid) {
+            throw new DuplicateUserException();
+        }
     }
 }
