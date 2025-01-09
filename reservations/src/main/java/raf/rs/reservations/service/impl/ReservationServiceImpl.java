@@ -3,6 +3,8 @@ package raf.rs.reservations.service.impl;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+
+import io.github.resilience4j.retry.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +34,15 @@ public class ReservationServiceImpl implements ReservationService {
     private final RestTemplate userServiceRestTemplate;
     private final JmsTemplate jmsTemplate;
     private final String destination;
+    private final Retry userRetry;
 
     public ReservationServiceImpl(
-        TaskScheduler scheduler,
-        AppointmentRepository appointmentRepository,
-        ReservationRepository reservationRepository,
-        RestTemplate userServiceRestTemplate,
-        JmsTemplate jmsTemplate,
-        @Value("${destination.sendMail}") String destination
+            TaskScheduler scheduler,
+            AppointmentRepository appointmentRepository,
+            ReservationRepository reservationRepository,
+            RestTemplate userServiceRestTemplate,
+            JmsTemplate jmsTemplate,
+            @Value("${destination.sendMail}") String destination, Retry userRetry
     ) {
         this.scheduler = scheduler;
         this.appointmentRepository = appointmentRepository;
@@ -47,6 +50,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.userServiceRestTemplate = userServiceRestTemplate;
         this.jmsTemplate = jmsTemplate;
         this.destination = destination;
+        this.userRetry = userRetry;
     }
 
     @Override
@@ -73,7 +77,8 @@ public class ReservationServiceImpl implements ReservationService {
 
         // Try to find the info of the user which created the reservation
         // Check if the user is banned here maybe??
-        final UserDto userDto = this.findById(reservationCreateDto.getUserId());
+      //  final UserDto userDto = this.findById(reservationCreateDto.getUserId());
+        final UserDto userDto = Retry.decorateSupplier(userRetry,()->this.findById(reservationCreateDto.getUserId())).get();
         if (userDto == null) {
             throw new NotFoundException("User does not exist");
         }
@@ -221,10 +226,16 @@ public class ReservationServiceImpl implements ReservationService {
 
     private UserDto findById(Long userId) {
         final ResponseEntity<UserDto> responseEntity;
+        System.out.println("[" + System.currentTimeMillis() / 1000 + "] Getting user for id: " +userId );
         try {
+            Thread.sleep(9000);
             responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(userId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {
+            e.printStackTrace();
             throw new InternalError();
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         if (responseEntity.getBody() == null) {
@@ -236,6 +247,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     private UserDto findByRestaurantId(Long restaurantId) {
         final ResponseEntity<UserDto> responseEntity;
+
         try {
             responseEntity = this.userServiceRestTemplate.exchange("/manager/%s".formatted(restaurantId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {

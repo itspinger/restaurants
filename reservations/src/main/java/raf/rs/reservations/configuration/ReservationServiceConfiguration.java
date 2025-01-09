@@ -1,6 +1,8 @@
 package raf.rs.reservations.configuration;
 
 import java.io.IOException;
+import java.util.Collections;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +19,8 @@ public class ReservationServiceConfiguration {
     @Bean
     public RestTemplate movieServiceRestTemplate() {
         final RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8035/api"));
-        //restTemplate.setInterceptors(Collections.singletonList(new TokenInterceptor()));
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8036/api"));
+        restTemplate.setInterceptors(Collections.singletonList(new TokenInterceptor()));
         return restTemplate;
     }
 
@@ -28,7 +30,7 @@ public class ReservationServiceConfiguration {
         public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes,
                                             ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
             HttpHeaders headers = httpRequest.getHeaders();
-            headers.add("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJpZCI6MSwicm9sZSI6IlJPTEVfQURNSU4ifQ.dEuh0NrmaqBXOV5RrlIfUkTcKhXUJK0lf4gc7uanyuTmiTOdSkPEsMfB7CPt1pGOYz7JyVilV3cTs6u4IQtc7Q");
+            headers.add("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwidXNlcklkIjozMDIsInJvbGVzIjpbIlJPTEVfQURNSU4iXX0.JMA9SVJk_rJKjAtxr7eop2K16Jm7j17DKmeJhQ0vMeA");
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         }
     }
