@@ -20,8 +20,6 @@ public class Appointment {
     @GeneratedValue
     private Long id;
 
-    private Date date;
-
     private LocalDateTime time;
 
     @ManyToOne

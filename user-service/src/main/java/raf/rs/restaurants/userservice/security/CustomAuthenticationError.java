@@ -16,6 +16,7 @@ public class CustomAuthenticationError implements AuthenticationEntryPoint {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
+
         if (authException instanceof DisabledException) {
             response.getWriter().write("{\"error\": \"Access denied\", \"message\": \"Your account is disabled. Please contact the administrator.\"}");
         } else {

@@ -5,5 +5,6 @@ public enum ErrorCode {
     INVALID_DATA,
     NOT_CLIENT,
     ALREADY_EXISTS,
-    FORBIDDEN
+    FORBIDDEN,
+    INTERNAL_ERROR
 }

@@ -20,7 +20,7 @@ public class Table {
     @GeneratedValue
     private Long id;
 
-    private Integer capacity;
+    private int capacity;
     private Zone zone; //mozda treba enum
 
     @ManyToOne

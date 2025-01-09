@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import raf.rs.restaurants.userservice.client.notificationservice.dto.NotificationRequestDto;
@@ -125,8 +126,7 @@ public class UserServiceImpl implements UserService {
         final Claims claims = Jwts.claims();
         claims.put("username", user.getUsername());
         claims.put("userId", user.getId());
-        claims.put("roles", user.getAuthorities());
-
+        claims.put("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
         if (user instanceof Manager manager) {
             claims.put("restaurantId", manager.getRestaurantId());
         }

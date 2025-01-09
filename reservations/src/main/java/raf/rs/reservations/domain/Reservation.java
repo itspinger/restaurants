@@ -21,8 +21,6 @@ public class Reservation {
     @OneToOne
     private Appointment appointment;
 
-    private String note;
-
     private Long userId;
 
 }

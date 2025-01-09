@@ -1,5 +1,6 @@
 package raf.rs.reservations.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ReservationCreateDto {
 
-    private Long reservationId;
+    @NotNull
     private Long userId;
-    private AppointmentDto appointment;
+
+    @NotNull
+    private Long appointmentId;
 
 }

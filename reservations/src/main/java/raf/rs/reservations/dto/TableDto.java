@@ -16,11 +16,8 @@ import raf.rs.reservations.domain.Table;
 public class TableDto {
     private Long id;
 
-    @NotNull
-    @Min(value = 1)
-    private Integer capacity;
+    @Min(1)
+    private int capacity;
 
     private Table.Zone zone;
-
-    private RestaurantDto restaurantDto;
 }

@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -45,7 +46,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             final String username = this.jwtService.extractUsername(jwt);
             final Long userId = this.jwtService.get(jwt, "userId", Long.class);
             final Long restaurantId = this.jwtService.get(jwt, "restaurantId", Long.class);
-            final Collection<? extends GrantedAuthority> authorities = this.jwtService.extractAuthorities(jwt);
+            final Collection<? extends GrantedAuthority> authorities = this.jwtService.extractAuthorities(jwt)
+                .stream()
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+
             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (username != null && authentication == null) {
@@ -63,6 +68,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
+            exception.printStackTrace();
             this.handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }

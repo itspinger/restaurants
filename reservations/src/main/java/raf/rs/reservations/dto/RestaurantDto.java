@@ -1,5 +1,7 @@
 package raf.rs.reservations.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -23,19 +25,25 @@ public class RestaurantDto {
     @Size(min = 5, max = 200)
     private String address;
 
+    @NotNull
+    @Size(min = 20, max = 200)
     private String description;
 
     @NotNull
+    @NotEmpty
     private String openTime;
 
     @NotNull
     @Size(min = 3, max = 50)
     private String type;
 
-    @NotNull
     private List<TableDto> tables;
 
+    @Min(-1)
+    @NotNull
     private int discountAfterXReservations;
 
+    @Min(-1)
+    @NotNull
     private int freeItemEachXReservations;
 }

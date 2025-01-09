@@ -16,6 +16,5 @@ public class UserDto {
     private String lastName;
     private String email;
     private String username;
-    private Integer reservationsNum;
-
+    private Integer reservationCount;
 }

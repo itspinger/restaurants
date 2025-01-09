@@ -13,7 +13,7 @@ public interface TokenService {
 
     String extractUsername(String jwt);
 
-    Collection<? extends GrantedAuthority> extractAuthorities(String jwt);
+    Collection<? extends String> extractAuthorities(String jwt);
 
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver);
 

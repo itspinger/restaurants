@@ -1,18 +1,28 @@
 package raf.rs.reservations.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
+import java.util.Map;
+import lombok.Setter;
 
 /**
  * This class represents error response.
  */
+@Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDetails {
 
-    @JsonProperty("error_code")
+    @JsonProperty("code")
     private ErrorCode errorCode;
-    @JsonProperty("error_message")
+
+    @JsonProperty("errorMessage")
     private String errorMessage;
+
     private Instant timestamp;
+
+    @JsonProperty("extra")
+    private Map<String, String> extra;
 
     public ErrorDetails() {
 
@@ -24,27 +34,26 @@ public class ErrorDetails {
         this.timestamp = timestamp;
     }
 
-    public ErrorCode getErrorCode() {
-        return errorCode;
+    public ErrorDetails(ErrorCode errorCode, String errorMessage, Instant timestamp, Map<String, String> extra) {
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.timestamp = timestamp;
+        this.extra = extra;
     }
 
-    public void setErrorCode(ErrorCode errorCode) {
-        this.errorCode = errorCode;
+    public ErrorCode getErrorCode() {
+        return this.errorCode;
     }
 
     public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+        return this.errorMessage;
     }
 
     public Instant getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
+    public Map<String, String> getExtra() {
+        return this.extra;
     }
 }

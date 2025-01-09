@@ -1,13 +1,10 @@
 package raf.rs.reservations.dto;
 
-import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.sql.Time;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,12 +13,7 @@ import java.util.Date;
 public class AppointmentDto {
     private Long id;
 
-    @NotNull
-    private Date date;
+    private LocalDateTime time;
 
-    @NotNull
-    private Time time;
-
-    @NotNull
-    private TableDto tablesDto;
+    private TableDto table;
 }

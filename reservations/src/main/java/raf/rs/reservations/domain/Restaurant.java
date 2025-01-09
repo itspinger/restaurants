@@ -7,6 +7,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @jakarta.persistence.Table(name = "restaurant")
@@ -19,15 +20,24 @@ public class Restaurant {
     @Id
     @GeneratedValue
     private Long id;
-    private String name;
-    private String address;
-    private String description;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant", orphanRemoval = true)
-    private List<Table> tables=new ArrayList<>();
-    private String open_time;
-    private String type;
-    private int discountAfterXReservations;
-    private int freeItemEachXReservations;
 
+    private String name;
+
+    private String address;
+
+    private String description;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "restaurant", orphanRemoval = true)
+    private List<Table> tables = new ArrayList<>();
+
+    private String openTime;
+
+    private String type;
+
+    @ColumnDefault("-1")
+    private int discountAfterXReservations;
+
+    @ColumnDefault("-1")
+    private int freeItemEachXReservations;
 
 }

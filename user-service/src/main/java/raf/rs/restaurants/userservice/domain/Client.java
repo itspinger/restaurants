@@ -20,7 +20,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @AllArgsConstructor
 public class Client extends User {
     @ColumnDefault("0")
-    private Integer reservationCount = 0;
+    private int reservationCount = 0;
 
     @Override
     @Transient

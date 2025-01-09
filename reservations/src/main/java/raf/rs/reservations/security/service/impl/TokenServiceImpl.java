@@ -6,7 +6,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Collection;
 import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import raf.rs.reservations.security.service.TokenService;
@@ -56,8 +55,8 @@ public class TokenServiceImpl implements TokenService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<? extends GrantedAuthority> extractAuthorities(String jwt) {
-        return (Collection<? extends GrantedAuthority>) this.extractClaim(jwt, (claims) -> claims.get("roles", Collection.class));
+    public Collection<? extends String> extractAuthorities(String jwt) {
+        return (Collection<? extends String>) this.extractClaim(jwt, (claims) -> claims.get("roles", Collection.class));
     }
 
     @Override
