@@ -30,4 +30,18 @@ public class AdminController {
     public ResponseEntity<SuccessMessageDto> unban(@PathVariable Long userId) {
         return new ResponseEntity<>(this.userService.unban(userId), HttpStatus.ACCEPTED);
     }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/increaseReservations/{id}")
+    public ResponseEntity<Void> increaseReservationCount(@PathVariable Long id) {
+        this.userService.increaseReservationCount(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/decreaseReservations/{id}")
+    public ResponseEntity<Void> decreaseReservationCount(@PathVariable Long id) {
+        this.userService.decreaseReservationCount(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

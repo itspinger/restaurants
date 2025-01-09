@@ -13,12 +13,19 @@ import lombok.Setter;
 public class UserDto {
 
     private Long id;
+
     private String firstName;
+
     private String lastName;
+
     private String email;
+
     private String username;
+
     private Integer reservationCount;
+
     private Long restaurantId;
+
     private Date startDate;
 
 }

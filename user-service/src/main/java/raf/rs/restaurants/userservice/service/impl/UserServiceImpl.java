@@ -3,6 +3,8 @@ package raf.rs.restaurants.userservice.service.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.transaction.Transactional;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import java.util.Optional;
@@ -23,6 +25,8 @@ import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
 import raf.rs.restaurants.userservice.dto.UserCreateDto;
 import raf.rs.restaurants.userservice.dto.UserDto;
+import raf.rs.restaurants.userservice.dto.UserPatchDto;
+import raf.rs.restaurants.userservice.exception.AlreadyExistsException;
 import raf.rs.restaurants.userservice.exception.DuplicateUserException;
 import raf.rs.restaurants.userservice.exception.IncorrectCredentialsException;
 import raf.rs.restaurants.userservice.exception.NotClientException;
@@ -188,6 +192,42 @@ public class UserServiceImpl implements UserService {
         user.setBanned(false);
         this.userRepository.save(user);
         return SuccessMessageDto.success("Successfully unbanned the account!");
+    }
+
+    @Override
+    public UserDto patchUser(UserPatchDto userDto, Long id) {
+        final User user = this.findUserById(id);
+        this.checkExistsUser(user, userDto);
+
+        final LocalDate dateOfBirth = userDto.validateDate(userDto.getDateOfBirth());
+
+        user.setBirthDate(dateOfBirth);
+        user.setUsername(userDto.getUsername());
+        user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
+        user.setEmail(userDto.getEmail());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+
+        if (user instanceof Manager manager) {
+            manager.setRestaurantId(userDto.getRestaurantId());
+
+            if (manager.getStartDate() != null) {
+                final LocalDate startDate = userDto.validateDate(userDto.getStartDate());
+                manager.setStartDate(startDate);
+            }
+        }
+
+        return this.modelMapper.map(this.userRepository.save(user), UserDto.class);
+    }
+
+    private void checkExistsUser(User user, UserPatchDto userDto) {
+        if (!user.getUsername().equals(userDto.getUsername()) && this.userRepository.existsByUsername(userDto.getUsername())) {
+            throw new AlreadyExistsException("User with this username already exists");
+        }
+
+        if (!user.getEmail().equals(userDto.getEmail()) && this.userRepository.existsByEmail(userDto.getEmail())) {
+            throw new AlreadyExistsException("User with this email already exists");
+        }
     }
 
     private User findUserById(Long userId) {

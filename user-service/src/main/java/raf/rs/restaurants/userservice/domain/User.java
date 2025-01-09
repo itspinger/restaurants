@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.Table;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -50,7 +50,7 @@ public class User implements UserDetails {
 
     private String lastName;
 
-    private Date birthDate;
+    private LocalDate birthDate;
 
     private String verificationToken;
 

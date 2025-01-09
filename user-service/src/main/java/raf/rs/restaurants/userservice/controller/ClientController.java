@@ -3,7 +3,6 @@ package raf.rs.restaurants.userservice.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,17 +23,5 @@ public class ClientController {
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerClient(@RequestBody @Valid UserCreateDto userCreateDto) {
         return new ResponseEntity<>(this.userService.createClient(userCreateDto), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/increaseReservations/{id}")
-    public ResponseEntity<Void> increaseReservationCount(@PathVariable Long id) {
-        this.userService.increaseReservationCount(id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PostMapping("/decreaseReservations/{id}")
-    public ResponseEntity<Void> decreaseReservationCount(@PathVariable Long id) {
-        this.userService.decreaseReservationCount(id);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
