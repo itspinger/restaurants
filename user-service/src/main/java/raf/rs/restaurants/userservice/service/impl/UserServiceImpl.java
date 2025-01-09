@@ -132,10 +132,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void increaseReservationCount(Long id) {
-        final User user = this.userRepository
-            .findById(id)
-            .orElseThrow(() -> new NotFoundException("User does not exist"));
-
+        final User user = this.findUserById(id);
         if (!(user instanceof Client client)) {
             throw new NotClientException();
         }
@@ -146,10 +143,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void decreaseReservationCount(Long id) {
-        final User user = this.userRepository
-            .findById(id)
-            .orElseThrow(() -> new NotFoundException("User does not exist"));
-
+        final User user = this.findUserById(id);
         if (!(user instanceof Client client)) {
             throw new NotClientException();
         }
@@ -178,6 +172,26 @@ public class UserServiceImpl implements UserService {
         user.setVerificationToken(null);
         this.userRepository.save(user);
         return SuccessMessageDto.success("Successfully verified your email!");
+    }
+
+    @Override
+    public SuccessMessageDto ban(Long userId) {
+        final User user = this.findUserById(userId);
+        user.setBanned(true);
+        this.userRepository.save(user);
+        return SuccessMessageDto.success("Successfully banned the account!");
+    }
+
+    @Override
+    public SuccessMessageDto unban(Long userId) {
+        final User user = this.findUserById(userId);
+        user.setBanned(false);
+        this.userRepository.save(user);
+        return SuccessMessageDto.success("Successfully unbanned the account!");
+    }
+
+    private User findUserById(Long userId) {
+        return this.userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User does not exist"));
     }
 
     private void sendVerificationEmail(User user) {

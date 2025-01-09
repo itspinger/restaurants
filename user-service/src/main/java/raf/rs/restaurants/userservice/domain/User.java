@@ -41,6 +41,9 @@ public class User implements UserDetails {
     @ColumnDefault("false")
     private boolean activated;
 
+    @ColumnDefault("false")
+    private boolean banned;
+
     private String password;
 
     private String firstName;
@@ -56,4 +59,8 @@ public class User implements UserDetails {
         return List.of();
     }
 
+    @Override
+    public boolean isEnabled() {
+        return !this.banned;
+    }
 }

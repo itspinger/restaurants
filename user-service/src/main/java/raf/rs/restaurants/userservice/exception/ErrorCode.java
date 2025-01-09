@@ -4,5 +4,6 @@ public enum ErrorCode {
     NOT_FOUND,
     INVALID_DATA,
     NOT_CLIENT,
-    ALREADY_EXISTS
+    ALREADY_EXISTS,
+    FORBIDDEN
 }

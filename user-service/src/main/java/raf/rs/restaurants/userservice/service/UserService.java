@@ -27,4 +27,8 @@ public interface UserService {
     UserDto findManagerByRestaurantId(Long restaurantId);
 
     SuccessMessageDto validateVerificationToken(String token);
+
+    SuccessMessageDto ban(Long userId);
+
+    SuccessMessageDto unban(Long userId);
 }
