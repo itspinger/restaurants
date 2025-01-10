@@ -88,6 +88,8 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(() -> new NotFoundException("User does not exist"));
     }
 
+
+
     @Override
     public UserDto createClient(UserCreateDto userCreateDto) {
         this.checkExists(userCreateDto);
@@ -184,6 +186,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public SuccessMessageDto validatePasswordResetToken(String token) {
+        final Optional<User> valid = this.userRepository.findByVerificationToken(token);
+        if (valid.isEmpty()) {
+            throw new NotFoundException("Password reset token does not exist");
+        }
+        final User user = valid.get();
+        //TODO ovde treba da se doda da sacuva nekako password
+        //Placeholeder
+        UserPatchDto userPatchDto = null;
+        String newPassword="";
+        userPatchDto.setPassword(newPassword);
+        this.patchUser(userPatchDto,user.getId());
+        user.setVerificationToken(null);
+        this.userRepository.save(user);
+        return SuccessMessageDto.success("Successfully reseted your password!");
+    }
+
+    @Override
     public SuccessMessageDto ban(Long userId) {
         final User user = this.findUserById(userId);
         user.setBanned(true);
@@ -263,6 +283,18 @@ public class UserServiceImpl implements UserService {
         );
 
         this.jmsTemplate.convertAndSend(this.destination, dto);
+    }
+
+    @Override
+    public void sendPasswordResetEmail(User user) {
+            final NotificationRequestDto dto = NotificationRequestDto.of(
+                    "Password Reset",
+                    user.getEmail(),
+                    user.getUsername(),
+                    "http://localhost:8084/user-service/api/user/reset-password?token=%s".formatted(user.getResetToken())
+            );
+
+            this.jmsTemplate.convertAndSend(this.destination, dto);
     }
 
     private void checkExists(UserCreateDto dto) {
