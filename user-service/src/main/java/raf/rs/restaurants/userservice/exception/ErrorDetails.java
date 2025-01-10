@@ -14,6 +14,9 @@ import lombok.Setter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDetails {
 
+    @JsonProperty("failed")
+    private boolean failed = true;
+
     @JsonProperty("code")
     private ErrorCode errorCode;
 
@@ -56,5 +59,9 @@ public class ErrorDetails {
 
     public Map<String, String> getExtra() {
         return this.extra;
+    }
+
+    public boolean isFailed() {
+        return this.failed;
     }
 }

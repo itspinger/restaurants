@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import raf.rs.restaurants.userservice.exception.InvalidTokenException;
 import raf.rs.restaurants.userservice.exception.LockedException;
 import raf.rs.restaurants.userservice.security.service.TokenService;
 
@@ -64,6 +65,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    throw new InvalidTokenException("Failed to verify token");
                 }
             }
 
