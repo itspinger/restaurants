@@ -150,6 +150,7 @@ public class UserServiceImpl implements UserService {
         final User user = this.findUserById(id);
         if (!(user instanceof Client client)) {
             throw new NotClientException();
+
         }
 
         client.setReservationCount(client.getReservationCount() - 1);
@@ -170,6 +171,7 @@ public class UserServiceImpl implements UserService {
         if (valid.isEmpty()) {
             throw new NotFoundException("Verification token does not exist");
         }
+
 
         final User user = valid.get();
         user.setActivated(true);

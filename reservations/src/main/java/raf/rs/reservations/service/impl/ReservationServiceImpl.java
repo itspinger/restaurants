@@ -231,10 +231,11 @@ public class ReservationServiceImpl implements ReservationService {
             Thread.sleep(9000);
             responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(userId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {
-            System.out.println("HTTP Status: " + e.getStatusCode());
+           /* System.out.println("HTTP Status: " + e.getStatusCode());
             System.out.println("Response Body: " + e.getResponseBodyAsString());
             System.out.println("Headers: " + e.getResponseHeaders());
             e.printStackTrace();
+            */
             throw new InternalError("Error while communicating with user service ");
 
         } catch (InterruptedException e) {
@@ -254,7 +255,12 @@ public class ReservationServiceImpl implements ReservationService {
         try {
             responseEntity = this.userServiceRestTemplate.exchange("/manager/%s".formatted(restaurantId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {
-            throw new InternalError();
+            System.out.println("HTTP Status: " + e.getStatusCode());
+            System.out.println("Response Body: " + e.getResponseBodyAsString());
+            System.out.println("Headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+            throw new InternalError("Error while communicating with user for manager id by restaurant id  ");
+
         }
 
         if (responseEntity.getBody() == null) {
