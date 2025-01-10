@@ -8,9 +8,7 @@
       <div class="flex flex-1 justify-center">
         <ul class="flex items-center space-x-4 list-none">
           <NavItem to="/">Home</NavItem>
-          <NavItem :to="{ path: '/draw/'}">Draw</NavItem>
-          <NavItem to="/gallery/1">Gallery</NavItem>
-          <NavItem v-if="authStore.isLoggedIn" :to="{ path: '/gallery/1', query: { author: authStore.uuid } }">My Gallery</NavItem>
+          <NavItem v-if="authStore.isLoggedIn" to="/profile">Edit Profile</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/login">Login</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/register">Register</NavItem>
           <button 
@@ -23,7 +21,7 @@
       </div>
 
       <div class="item ml-4">
-        <RouterLink v-if="!authStore.isLoggedIn" to="/draw" class="hidden lg:flex px-6 py-2 text-white bg-indigo-600 rounded-md">Get Started</RouterLink>
+        <RouterLink v-if="!authStore.isLoggedIn" to="/restaurants" class="hidden lg:flex px-6 py-2 text-white bg-indigo-600 rounded-md">Book Now</RouterLink>
         <p v-if="authStore.isLoggedIn" class="hidden lg:flex px-6 py-2 text-white bg-indigo-600 rounded-md">Welcome, {{  authStore.username }}</p>
       </div>
     </nav>

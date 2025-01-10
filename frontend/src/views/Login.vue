@@ -134,6 +134,6 @@ const onSubmit = async () => {
     return;
   }
     
-  router.push({'name': 'draw'});
+  router.push({'name': 'home'});
 };
 </script>

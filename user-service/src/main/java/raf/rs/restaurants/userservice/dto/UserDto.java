@@ -1,5 +1,6 @@
 package raf.rs.restaurants.userservice.dto;
 
+import java.time.LocalDate;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,8 @@ public class UserDto {
     private String username;
 
     private Integer reservationCount;
+
+    private LocalDate birthDate;
 
     private Long restaurantId;
 

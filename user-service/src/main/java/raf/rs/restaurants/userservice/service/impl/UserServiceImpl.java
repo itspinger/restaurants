@@ -3,7 +3,6 @@ package raf.rs.restaurants.userservice.service.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.transaction.Transactional;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -88,6 +87,8 @@ public class UserServiceImpl implements UserService {
     public UserDto createClient(UserCreateDto userCreateDto) {
         this.checkExists(userCreateDto);
 
+        System.out.println(userCreateDto.getBirthDate());
+
         final Client client = this.modelMapper.map(userCreateDto, Client.class);
         final String token = UUID.randomUUID().toString();
         client.setPassword(this.passwordEncoder.encode(userCreateDto.getPassword()));
@@ -102,6 +103,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createManager(UserCreateDto userCreateDto) {
         this.checkExists(userCreateDto);
+
+        System.out.println(userCreateDto.getBirthDate());
 
         final Manager manager = this.modelMapper.map(userCreateDto, Manager.class);
         final String token = UUID.randomUUID().toString();
@@ -131,7 +134,10 @@ public class UserServiceImpl implements UserService {
             claims.put("restaurantId", manager.getRestaurantId());
         }
 
-        return new TokenResponseDto(this.tokenService.generate(claims));
+        final TokenResponseDto dto = new TokenResponseDto();
+        dto.setToken(this.tokenService.generate(claims));
+        dto.setUser(this.modelMapper.map(user, UserDto.class));
+        return dto;
     }
 
     @Override
@@ -201,19 +207,36 @@ public class UserServiceImpl implements UserService {
         final User user = this.findUserById(id);
         this.checkExistsUser(user, userDto);
 
-        final LocalDate dateOfBirth = userDto.validateDate(userDto.getDateOfBirth());
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
 
-        user.setBirthDate(dateOfBirth);
-        user.setUsername(userDto.getUsername());
-        user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
-        user.setEmail(userDto.getEmail());
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
+        if (userDto.getUsername() != null) {
+            user.setUsername(userDto.getUsername());
+        }
+
+        if (userDto.getFirstName() != null) {
+            user.setFirstName(userDto.getFirstName());
+        }
+
+        if (userDto.getLastName() != null) {
+            user.setLastName(userDto.getLastName());
+        }
+
+        if (userDto.getPassword() != null) {
+            user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
+        }
+
+        if (userDto.getBirthDate() != null) {
+            user.setBirthDate(userDto.validateDate(userDto.getBirthDate()));
+        }
 
         if (user instanceof Manager manager) {
-            manager.setRestaurantId(userDto.getRestaurantId());
+            if (userDto.getRestaurantId() != null) {
+                manager.setRestaurantId(userDto.getRestaurantId());
+            }
 
-            if (manager.getStartDate() != null) {
+            if (userDto.getStartDate() != null) {
                 final LocalDate startDate = userDto.validateDate(userDto.getStartDate());
                 manager.setStartDate(startDate);
             }
@@ -223,11 +246,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkExistsUser(User user, UserPatchDto userDto) {
-        if (!user.getUsername().equals(userDto.getUsername()) && this.userRepository.existsByUsername(userDto.getUsername())) {
+        if (userDto.getUsername() != null && !user.getUsername().equals(userDto.getUsername()) && this.userRepository.existsByUsername(userDto.getUsername())) {
             throw new AlreadyExistsException("User with this username already exists");
         }
 
-        if (!user.getEmail().equals(userDto.getEmail()) && this.userRepository.existsByEmail(userDto.getEmail())) {
+        if (userDto.getEmail() != null && !user.getEmail().equals(userDto.getEmail()) && this.userRepository.existsByEmail(userDto.getEmail())) {
             throw new AlreadyExistsException("User with this email already exists");
         }
     }
