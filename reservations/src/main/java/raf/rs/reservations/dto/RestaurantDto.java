@@ -46,4 +46,6 @@ public class RestaurantDto {
     @Min(-1)
     @NotNull
     private int freeItemEachXReservations;
+    @NotNull
+    private Long managerId;
 }

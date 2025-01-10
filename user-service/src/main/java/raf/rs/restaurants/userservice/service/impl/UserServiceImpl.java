@@ -135,9 +135,7 @@ public class UserServiceImpl implements UserService {
         claims.put("username", user.getUsername());
         claims.put("userId", user.getId());
         claims.put("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
-        if (user instanceof Manager manager) {
-            claims.put("restaurantId", manager.getRestaurantId());
-        }
+
 
         final TokenResponseDto dto = new TokenResponseDto();
         dto.setToken(this.tokenService.generate(claims));
@@ -168,13 +166,7 @@ public class UserServiceImpl implements UserService {
         this.userRepository.save(user);
     }
 
-    @Override
-    public UserDto findManagerByRestaurantId(Long restaurantId) {
-        return this.managerRepository
-            .findByRestaurantId(restaurantId)
-            .map(user -> this.modelMapper.map(user, UserDto.class))
-            .orElseThrow(() -> new NotFoundException("User does not exist"));
-    }
+
 
     @Override
     public SuccessMessageDto validateVerificationToken(String token) {
@@ -237,9 +229,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (user instanceof Manager manager) {
-            if (userDto.getRestaurantId() != null) {
-                manager.setRestaurantId(userDto.getRestaurantId());
-            }
+
 
             if (userDto.getStartDate() != null) {
                 final LocalDate startDate = userDto.validateDate(userDto.getStartDate());

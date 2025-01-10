@@ -89,7 +89,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         this.reservationRepository.save(reservation);
 
-        final UserDto managerDto = this.findByRestaurantId(restaurant.getId());
+        final UserDto managerDto = this.findById(restaurant.getManagerId());
         this.sendNotifications(userDto, managerDto, benefits, restaurant, appointment);
 
         // After the reservation was saved we need to increase
@@ -145,7 +145,7 @@ public class ReservationServiceImpl implements ReservationService {
         final Long userId = reservation.getUserId();
 
         final UserDto clientDto = this.findById(userId);
-        final UserDto managerDto = this.findByRestaurantId(restaurant.getId());
+        final UserDto managerDto = this.findById(restaurant.getManagerId());
 
         this.reservationRepository.delete(reservation);
 
@@ -253,24 +253,5 @@ public class ReservationServiceImpl implements ReservationService {
         return responseEntity.getBody();
     }
 
-    private UserDto findByRestaurantId(Long restaurantId) {
-        final ResponseEntity<UserDto> responseEntity;
 
-        try {
-            responseEntity = this.userServiceRestTemplate.exchange("/manager/%s".formatted(restaurantId), HttpMethod.GET, null, UserDto.class);
-        } catch (HttpClientErrorException e) {
-            System.out.println("HTTP Status: " + e.getStatusCode());
-            System.out.println("Response Body: " + e.getResponseBodyAsString());
-            System.out.println("Headers: " + e.getResponseHeaders());
-            e.printStackTrace();
-            throw new InternalError("Error while communicating with user for manager id by restaurant id  ");
-
-        }
-
-        if (responseEntity.getBody() == null) {
-            throw new NotFoundException("This restaurant does not have a manager");
-        }
-
-        return responseEntity.getBody();
-    }
 }
