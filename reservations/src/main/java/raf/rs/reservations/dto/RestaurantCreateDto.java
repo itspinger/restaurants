@@ -42,4 +42,7 @@ public class RestaurantCreateDto {
     @Min(-1)
     @NotNull
     private int freeItemEachXReservations;
+
+    @NotNull
+    private Long managerId;
 }

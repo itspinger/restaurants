@@ -26,8 +26,7 @@ public interface UserService {
     void increaseReservationCount(Long id);
 
     void decreaseReservationCount(Long id);
-
-    UserDto findManagerByRestaurantId(Long restaurantId);
+    ;
 
     SuccessMessageDto validateVerificationToken(String token);
 

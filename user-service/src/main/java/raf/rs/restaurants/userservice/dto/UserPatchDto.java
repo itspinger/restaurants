@@ -31,8 +31,6 @@ public class UserPatchDto {
 
     private String birthDate;
 
-    private Long restaurantId;
-
     private String startDate;
 
     public LocalDate validateDate(String date) {

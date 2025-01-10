@@ -40,4 +40,6 @@ public class Restaurant {
     @ColumnDefault("-1")
     private int freeItemEachXReservations;
 
+    private Long managerId;
+
 }

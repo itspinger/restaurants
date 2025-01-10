@@ -19,7 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @AllArgsConstructor
 public class Manager extends User {
 
-    private Long restaurantId;
+
     private LocalDate startDate;
 
     @Override

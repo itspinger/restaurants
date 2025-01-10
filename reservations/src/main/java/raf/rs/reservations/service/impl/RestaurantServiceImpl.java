@@ -45,6 +45,8 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public RestaurantDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
         final Restaurant restaurant = this.modelMapper.map(restaurantCreateDto, Restaurant.class);
+        System.out.println(restaurant.getId()+" "+restaurant.getManagerId());
+        restaurant.setId(null);
         this.restaurantRepository.save(restaurant);
         return this.modelMapper.map(restaurant, RestaurantDto.class);
     }
@@ -62,6 +64,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setType(restaurantDto.getType());
         restaurant.setDiscountAfterXReservations(restaurantDto.getDiscountAfterXReservations());
         restaurant.setFreeItemEachXReservations(restaurantDto.getFreeItemEachXReservations());
+        restaurant.setManagerId(restaurantDto.getManagerId());
 
         return this.modelMapper.map(this.restaurantRepository.save(restaurant), RestaurantDto.class);
     }

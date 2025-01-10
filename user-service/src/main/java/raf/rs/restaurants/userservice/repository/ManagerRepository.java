@@ -8,6 +8,6 @@ import raf.rs.restaurants.userservice.domain.Manager;
 @Repository
 public interface ManagerRepository extends JpaRepository<Manager, Long> {
 
-    Optional<Manager> findByRestaurantId(Long restaurantId);
+
 
 }

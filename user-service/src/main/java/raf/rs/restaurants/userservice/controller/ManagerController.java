@@ -27,8 +27,4 @@ public class ManagerController {
         return new ResponseEntity<>(this.userService.createManager(userCreateDto), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{restaurantId}")
-    public ResponseEntity<UserDto> getManagerByRestaurantId(@PathVariable Long restaurantId) {
-        return new ResponseEntity<>(this.userService.findManagerByRestaurantId(restaurantId), HttpStatus.OK);
-    }
 }
