@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.http.HttpStatusCode;
+import raf.rs.restaurants.userservice.domain.User;
 import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
@@ -17,6 +18,7 @@ public interface UserService {
 
     UserDto findById(Long id);
 
+
     UserDto createClient(UserCreateDto userCreateDto);
 
     UserDto createManager(UserCreateDto userCreateDto);
@@ -26,9 +28,12 @@ public interface UserService {
     void increaseReservationCount(Long id);
 
     void decreaseReservationCount(Long id);
-    ;
 
     SuccessMessageDto validateVerificationToken(String token);
+
+    SuccessMessageDto validatePasswordResetToken(String token);
+
+    void sendPasswordResetEmail(User user);
 
     SuccessMessageDto ban(Long userId);
 

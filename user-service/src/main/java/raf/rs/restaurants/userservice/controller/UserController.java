@@ -6,17 +6,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import raf.rs.restaurants.userservice.dto.TokenRequestDto;
-import raf.rs.restaurants.userservice.dto.TokenResponseDto;
-import raf.rs.restaurants.userservice.dto.UserDto;
-import raf.rs.restaurants.userservice.dto.UserPatchDto;
+import org.springframework.web.bind.annotation.*;
+import raf.rs.restaurants.userservice.dto.*;
 import raf.rs.restaurants.userservice.service.UserService;
 
 @RestController
@@ -48,5 +39,16 @@ public class UserController {
     public ResponseEntity<UserDto> patch(@RequestBody @Valid UserPatchDto userDto, @PathVariable Long id) {
         return new ResponseEntity<>(this.userService.patchUser(userDto, id), HttpStatus.OK);
     }
+   /* @PostMapping("/reset-password")
+    public ResponseEntity<UserDto> sendMail(@RequestParam("email") String email) {
+        return new ResponseEntity<>(this.userService., HttpStatus.OK);
+    }
 
+    */
+    //TODO ne znam gde da posaljem mail za reset, ovo je za verification
+    @GetMapping("/reset-passwordVerification")
+    public ResponseEntity<SuccessMessageDto> resetPassword(@RequestParam("token") String token) {
+
+        return new ResponseEntity<>(this.userService.validatePasswordResetToken(token), HttpStatus.OK);
+    }
 }
