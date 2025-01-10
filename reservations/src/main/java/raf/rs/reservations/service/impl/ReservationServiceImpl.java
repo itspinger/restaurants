@@ -97,7 +97,11 @@ public class ReservationServiceImpl implements ReservationService {
         try {
             this.userServiceRestTemplate.exchange("/admin/increaseReservations/%s".formatted(reservationCreateDto.getUserId()), HttpMethod.POST, null, Void.class);
         } catch (HttpClientErrorException e) {
-            throw new InternalError();
+            System.out.println("HTTP Status: " + e.getStatusCode());
+            System.out.println("Response Body: " + e.getResponseBodyAsString());
+            System.out.println("Headers: " + e.getResponseHeaders());
+            e.printStackTrace();
+            throw new InternalError("admin increse reservation num");
         }
 
         this.scheduleReminder(userDto, reservation);
@@ -231,11 +235,11 @@ public class ReservationServiceImpl implements ReservationService {
             Thread.sleep(9000);
             responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(userId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {
-           /* System.out.println("HTTP Status: " + e.getStatusCode());
+            System.out.println("HTTP Status: " + e.getStatusCode());
             System.out.println("Response Body: " + e.getResponseBodyAsString());
             System.out.println("Headers: " + e.getResponseHeaders());
             e.printStackTrace();
-            */
+
             throw new InternalError("Error while communicating with user service ");
 
         } catch (InterruptedException e) {

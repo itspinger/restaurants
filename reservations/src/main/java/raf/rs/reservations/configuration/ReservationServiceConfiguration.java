@@ -1,6 +1,8 @@
 package raf.rs.reservations.configuration;
 
 import java.io.IOException;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +19,8 @@ public class ReservationServiceConfiguration {
     @Bean
     public RestTemplate movieServiceRestTemplate() {
         final RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8036/api"));
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8084/user-service/api"));
+        restTemplate.setInterceptors(List.of(new TokenInterceptor()));
         return restTemplate;
     }
 
