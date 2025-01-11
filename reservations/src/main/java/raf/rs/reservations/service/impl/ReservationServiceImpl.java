@@ -140,6 +140,7 @@ public class ReservationServiceImpl implements ReservationService {
         // Ako je reminderTime after LocalDateTime.now()
         // Onda zakazati, u suprotnom ne raditi nista
         if (reminderTime.isAfter(LocalDateTime.now())) {
+            System.out.println(" it is after");
             this.scheduler.schedule(() -> {
                 final NotificationMessage reminder = NotificationMessage.of(
                     NotificationCategory.RESERVATION_REMINDER,

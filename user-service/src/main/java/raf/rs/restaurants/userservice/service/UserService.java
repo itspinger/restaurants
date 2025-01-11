@@ -33,9 +33,9 @@ public interface UserService {
 
     SuccessMessageDto validateVerificationToken(String token);
 
-    SuccessMessageDto validatePasswordResetToken(String token);
+    SuccessMessageDto validatePasswordResetToken(UserPatchDto userDto,String token);
 
-    void sendPasswordResetEmail(User user);
+    void sendPasswordResetEmail(String email);
 
     SuccessMessageDto ban(Long userId);
 

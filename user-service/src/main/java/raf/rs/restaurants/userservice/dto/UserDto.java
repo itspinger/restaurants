@@ -33,4 +33,5 @@ public class UserDto {
     private List<String> roles;
 
     private boolean banned;
+
 }
