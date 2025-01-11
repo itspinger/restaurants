@@ -4,6 +4,7 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import raf.rs.reservations.domain.Restaurant;
 
 public class UserDetailsImpl implements UserDetails {
     private final String username;
@@ -37,9 +38,7 @@ public class UserDetailsImpl implements UserDetails {
         return this.userId;
     }
 
-    public Long getRestaurantId() {
-        return this.restaurantId;
-    }
+
 
     public boolean hasRole(String role) {
         return this.authorities.contains(new SimpleGrantedAuthority(role));

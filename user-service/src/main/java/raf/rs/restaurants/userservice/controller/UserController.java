@@ -39,6 +39,7 @@ public class UserController {
     public ResponseEntity<UserDto> patch(@RequestBody @Valid UserPatchDto userDto, @PathVariable Long id) {
         return new ResponseEntity<>(this.userService.patchUser(userDto, id), HttpStatus.OK);
     }
+
     @PostMapping("/reset-password")
     public ResponseEntity<Void> sendMail(@RequestParam("email") String email) {
        this.userService.sendPasswordResetEmail(email);

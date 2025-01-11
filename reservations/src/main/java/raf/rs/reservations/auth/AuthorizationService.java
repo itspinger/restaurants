@@ -54,6 +54,5 @@ public class AuthorizationService {
     private Long getManagerId(Reservation reservation) {
         return reservation.getAppointment().getTable().getRestaurant().getManagerId();
     }
-
 }
 
