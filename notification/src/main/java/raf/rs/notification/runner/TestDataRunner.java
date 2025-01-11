@@ -1,25 +1,17 @@
 package raf.rs.notification.runner;
 
-import java.time.LocalDateTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import raf.rs.notification.domain.Notification;
 import raf.rs.notification.domain.NotificationType;
 import raf.rs.notification.repository.NotificationTypeRepository;
-import raf.rs.notification.service.NotificationService;
-import raf.rs.notification.service.NotificationTypeService;
 
 @Profile({"default"})
 @Component
 public class TestDataRunner implements CommandLineRunner {
-    private final NotificationService notificationService;
-    private final NotificationTypeService notificationTypeService;
     private final NotificationTypeRepository notificationTypeRepository;
 
-    public TestDataRunner(NotificationService notificationService, NotificationTypeService notificationTypeService, NotificationTypeRepository notificationTypeRepository) {
-        this.notificationService = notificationService;
-        this.notificationTypeService = notificationTypeService;
+    public TestDataRunner(NotificationTypeRepository notificationTypeRepository) {
         this.notificationTypeRepository = notificationTypeRepository;
     }
 
@@ -37,21 +29,13 @@ public class TestDataRunner implements CommandLineRunner {
     }
 
     private void createType(String name, String text) {
+        if (this.notificationTypeRepository.findByName(name).isPresent()) {
+            return;
+        }
+
         final NotificationType notificationType = new NotificationType();
         notificationType.setName(name);
         notificationType.setText(text);
         this.notificationTypeRepository.save(notificationType);
-    }
-
-    private void sendMail() {
-        NotificationType mailActivation = this.notificationTypeService.findByName("Email Verification");
-
-        final Notification notification = new Notification();
-        notification.setEmail("avelickovic8823rn@raf.rs");
-        notification.setTimestamp(LocalDateTime.now());
-        notification.setNotificationType(mailActivation);
-        notification.setText(mailActivation.getText());
-
-        this.notificationService.sendNotification(notification);
     }
 }

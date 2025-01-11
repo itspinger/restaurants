@@ -1,5 +1,6 @@
 package raf.rs.notification.service.impl;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import raf.rs.notification.domain.NotificationType;
 import raf.rs.notification.dto.NotificationTypeDto;
@@ -46,5 +47,13 @@ public class NotificationTypeServiceImpl implements NotificationTypeService {
 
         final NotificationType saved = this.repository.save(type);
         return this.notificationMapper.notificationTypeDtoFromNotificationType(saved);
+    }
+
+    @Override
+    public List<NotificationTypeDto> findAll() {
+        return this.repository.findAll()
+            .stream()
+            .map(this.notificationMapper::notificationTypeDtoFromNotificationType)
+            .toList();
     }
 }

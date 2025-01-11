@@ -8,12 +8,25 @@ export const useAuthStore = defineStore('auth', {
       username: null as String | null,
       uuid: null as number | null,
       token: '' as string,
+      roles: [] as string[]
     }),
 
     getters: {
       isLoggedIn: (state) => {
         return state.token.length > 0 && state.uuid !== null && state.username !== null;
       },
+
+      isAdmin: (state) => {
+        return state.roles.includes("ROLE_ADMIN");
+      },
+
+      isManager: (state) => {
+        return state.roles.includes("ROLE_MANAGER");
+      },
+
+      isClient: (state) => {
+        return state.roles.includes("ROLE_CLIENT");
+      }
     },
 
     actions: {
@@ -73,7 +86,7 @@ export const useAuthStore = defineStore('auth', {
           return null;
         }
 
-        const response = await requestFromApi<{ firstName: string, lastName: string, email: string, username: string, birthDate: string }>(
+        const response = await requestFromApi<{ firstName: string, lastName: string, email: string, username: string, birthDate: string, roles: string[] }>(
             'get',
             `user-service/api/user/${this.uuid}`
         );
@@ -83,6 +96,7 @@ export const useAuthStore = defineStore('auth', {
         } 
 
         this.username = response.username;
+        this.roles = response.roles;
         return response;
       },
 
@@ -109,6 +123,7 @@ export const useAuthStore = defineStore('auth', {
         this.username = null;
         this.token = '';
         this.uuid = null;
+        this.roles = [];
         localStorage.removeItem('user');
         delete axios.defaults.headers.common['Authorization'];
         useNotify().show('Successfully logged out of the account', 'success');

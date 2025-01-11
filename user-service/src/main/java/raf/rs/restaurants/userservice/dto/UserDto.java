@@ -1,7 +1,10 @@
 package raf.rs.restaurants.userservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,4 +34,5 @@ public class UserDto {
 
     private Date startDate;
 
+    private List<String> roles;
 }

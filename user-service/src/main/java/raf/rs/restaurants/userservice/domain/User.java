@@ -59,6 +59,10 @@ public class User implements UserDetails {
         return List.of();
     }
 
+    public List<String> getRoles() {
+        return this.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+    }
+
     @Override
     public boolean isEnabled() {
         return !this.banned;

@@ -26,7 +26,7 @@ public class TestDataRunner implements CommandLineRunner {
 
         final Admin admin = new Admin();
         admin.setUsername("admin");
-        admin.setPassword(this.encoder.encode("admin"));
+        admin.setPassword(this.encoder.encode("admin123"));
         this.userRepository.save(admin);
     }
 }

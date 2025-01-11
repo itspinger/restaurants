@@ -13,7 +13,12 @@
   import Navbar from '@/components/Navbar.vue';
 
   // Koristimo local storage da bismo ucitali token (ako je korisnik ulogovan naravno)
-  onMounted(() => {
+  onMounted(async () => {
     useAuthStore().loadToken();
+
+    // Takodje fetchujemo samog korisnika
+    if (useAuthStore().isLoggedIn) {
+      await useAuthStore().fetchSelfUser()
+    }
   });
 </script>

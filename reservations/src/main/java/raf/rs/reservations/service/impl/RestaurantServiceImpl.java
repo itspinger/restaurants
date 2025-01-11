@@ -1,8 +1,9 @@
 package raf.rs.reservations.service.impl;
 
 import jakarta.transaction.Transactional;
-import java.util.List;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import raf.rs.reservations.domain.Appointment;
 import raf.rs.reservations.domain.Restaurant;
@@ -35,12 +36,10 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public List<RestaurantDto> findAll() {
+    public Page<RestaurantDto> findAll(Pageable pageable) {
         return this.restaurantRepository
-            .findAll()
-            .stream()
-            .map((restaurant) -> this.modelMapper.map(restaurant, RestaurantDto.class))
-            .toList();
+            .findAll(pageable)
+            .map((restaurant) -> this.modelMapper.map(restaurant, RestaurantDto.class));
     }
 
     @Override
@@ -93,5 +92,13 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         this.tableRepository.save(table);
         return this.modelMapper.map(table, TableDto.class);
+    }
+
+    @Override
+    public RestaurantDto findById(Long restaurantId) {
+        return this.restaurantRepository
+            .findById(restaurantId)
+            .map((restaurant) -> this.modelMapper.map(restaurant, RestaurantDto.class))
+            .orElseThrow(() -> new NotFoundException("Restaurant does not exist"));
     }
 }

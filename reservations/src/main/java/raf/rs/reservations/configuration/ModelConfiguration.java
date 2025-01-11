@@ -14,5 +14,4 @@ public class ModelConfiguration {
         modelMapper.getConfiguration().setPreferNestedProperties(false);
         return modelMapper;
     }
-
 }

@@ -8,9 +8,14 @@
       <div class="flex flex-1 justify-center">
         <ul class="flex items-center space-x-4 list-none">
           <NavItem to="/">Home</NavItem>
-          <NavItem v-if="authStore.isLoggedIn" to="/profile">Edit Profile</NavItem>
+          <NavItem to="/find">Book Now</NavItem>
+          <NavItem to="/restaurants">Restaurants</NavItem>
+          <NavItem v-if="authStore.isLoggedIn" to="/notifications">Notifications</NavItem>
+          <NavItem v-if="authStore.isLoggedIn && !authStore.isAdmin" to="/profile">Edit Profile</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/login">Login</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/register">Register</NavItem>
+          <NavItem v-if="authStore.isClient" to="/">Client</NavItem>
+
           <button 
               v-if="authStore.isLoggedIn"
               @click="authStore.logout()" 

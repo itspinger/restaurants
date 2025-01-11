@@ -72,7 +72,12 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> findAll() {
         return this.userRepository.findAll()
             .stream()
-            .map((user) -> this.modelMapper.map(user, UserDto.class))
+            .map((user) -> {
+                System.out.println(user.getAuthorities());
+                final UserDto map = this.modelMapper.map(user, UserDto.class);
+                System.out.println(map.getRoles());
+                return map;
+            })
             .toList();
     }
 

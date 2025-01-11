@@ -26,7 +26,7 @@ public class ReservationServiceConfiguration {
         @Override
         public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes,
                                             ClientHttpRequestExecution clientHttpRequestExecution) throws IOException {
-            HttpHeaders headers = httpRequest.getHeaders();
+            final HttpHeaders headers = httpRequest.getHeaders();
             headers.add("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwidXNlcklkIjozMDIsInJvbGVzIjpbIlJPTEVfQURNSU4iXX0.JMA9SVJk_rJKjAtxr7eop2K16Jm7j17DKmeJhQ0vMeA");
             return clientHttpRequestExecution.execute(httpRequest, bytes);
         }
