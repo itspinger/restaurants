@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -56,12 +57,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (username != null && authentication == null) {
                 if (this.jwtService.isTokenValid(jwt, username)) {
                     final AbstractAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        username,
+                        new UserDetailsImpl(username, userId, restaurantId, authorities),
                         null,
                         authorities
                     );
 
-                    authToken.setDetails(new UserDetailsImpl(username, userId, restaurantId, authorities));
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }

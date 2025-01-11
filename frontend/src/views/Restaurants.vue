@@ -1,14 +1,15 @@
 <template>
    <div class= "flex items-center justify-center gap-5 py-5 flex-col">
       <h1 class="text-2xl font-bold">Restaurants</h1>
-      <button
-        v-if="authStore.isManager"
-        @click="openAddRestaurantDialog"
-        class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-      >
-        <v-icon size="20px">mdi-plus</v-icon>
-        Add Restaurant
-      </button>
+      <RouterLink to="/restaurants/new">
+        <button
+            v-if="authStore.isManager"
+            class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+            <v-icon size="20px">mdi-plus</v-icon>
+            Add Restaurant
+        </button>
+      </RouterLink>
 
       <!-- Pagination Component -->
       <Pagination
@@ -113,7 +114,7 @@
   const onItemDeleted = async (restaurant: Restaurant) => {
     const deleted = await restaurantStore.deleteRestaurant(restaurant.id)
     if (!deleted) {
-      return
+      return;
     }
     await fetchRestaurants()
   }

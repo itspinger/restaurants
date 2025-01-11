@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { requestFromApi } from '@/utils/api';
 import Restaurant from '@/types/restaurant';
+import { useNotify } from '@f3ve/vue-notify'
 
 export const useRestaurantStore = defineStore('restaurant', {
     state: () => ({
@@ -49,6 +50,29 @@ export const useRestaurantStore = defineStore('restaurant', {
                 return null;
             }
 
+            return response;
+        },
+
+        async createRestaurant(restaurant: Partial<Restaurant>) {
+            const notify = useNotify();
+            if (restaurant.id) {
+                notify.show('This restaurant is already created', 'error');
+                return null;
+            }
+
+            console.log(restaurant)
+
+            const response = await requestFromApi<Restaurant>(
+                'post',
+                `reservations/api/restaurants`,
+                restaurant
+            );
+
+            if (!response) {
+                return null;
+            }
+
+            notify.show('Successfully saved the restaurant', 'success');
             return response;
         }
     }

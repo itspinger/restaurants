@@ -1,11 +1,15 @@
 <template>
     <div class="flex items-center justify-center bg-white dark:bg-gray-900">
-      <div class="container mx-auto">
-        <div class="max-w-md mx-auto my-10">
-          <div class="text-center">
-            <h1 class="my-3 text-3xl font-semibold text-gray-700 dark:text-gray-200">Create New Restaurant</h1>
-            <p class="text-gray-500 dark:text-gray-400">Fill in the details for your new restaurant</p>
-          </div>
+      <div class="container mx-auto py-10">
+        <div v-if="!authStore.isManager" class="text-center">
+            <h1 class="my-3 text-3xl font-semibold text-gray-700 dark:text-gray-200">Error</h1>
+            <p class="text-gray-500 dark:text-gray-400">Failed to verify you as a manager</p>
+        </div>
+        <div v-else class="max-w-md mx-auto my-10">
+            <div class="text-center">
+                <h1 class="my-3 text-3xl font-semibold text-gray-700 dark:text-gray-200">Create New Restaurant</h1>
+                <p class="text-gray-500 dark:text-gray-400">Fill in the details for your new restaurant</p>
+            </div>
   
           <div class="m-7">
             <form @submit.prevent="onSubmit">
@@ -134,7 +138,7 @@
                 <label
                   for="discountAfterXReservations"
                   class="block mb-2 text-sm text-gray-600 dark:text-gray-400"
-                  >Discount After X Reservations</label
+                  >After how many reservations should a user get a discount?</label
                 >
                 <input
                   v-model="restaurant.discountAfterXReservations"
@@ -153,7 +157,7 @@
                 <label
                   for="freeItemEachXReservations"
                   class="block mb-2 text-sm text-gray-600 dark:text-gray-400"
-                  >Free Item Each X Reservations</label
+                  >How many reservations a user needs to get a free item?</label
                 >
                 <input
                   v-model="restaurant.freeItemEachXReservations"
@@ -185,16 +189,18 @@
 </template>
 
 <script lang="ts" setup>
-  import { RouterLink, useRouter } from 'vue-router';
   import { ref } from 'vue';
   import { useAuthStore } from '@/stores/auth';
+  import { useRestaurantStore } from '@/stores/restaurantStore';
+  import Restaurant from '@/types/restaurant';
+import router from '@/router';
 
   const restaurant = ref({
     name: '',
     address: '',
     description: '',
-    startTime: '',
-    endTime: '',
+    startTime: '09:00',
+    endTime: '17:00',
     type: '',
     discountAfterXReservations: 0,
     freeItemEachXReservations: 0
@@ -210,6 +216,7 @@
   const freeItemError = ref<string | null>(null);
 
   const authStore = useAuthStore();
+  const restaurantStore = useRestaurantStore()
 
   const validateName = () => {
     if (!restaurant.value.name) {
@@ -267,7 +274,7 @@
     }
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     validateName();
     validateAddress();
     validateDescription();
@@ -277,8 +284,25 @@
     validateFreeItem();
 
     if (!nameError.value && !addressError.value && !descriptionError.value && !startTimeError.value && !endTimeError.value && !discountError.value && !freeItemError.value) {
-      // Handle form submission
-      console.log('Form submitted:', restaurant.value);
+        if (!authStore.uuid) {
+            return;
+        }
+
+        const restaurantEntity : Partial<Restaurant> = {
+            name: restaurant.value.name,
+            address: restaurant.value.address,
+            description: restaurant.value.description,
+            openTime: `${restaurant.value.startTime}-${restaurant.value.endTime}`,
+            type: restaurant.value.type,
+            discountAfterXReservations: restaurant.value.discountAfterXReservations,
+            freeItemEachXReservations: restaurant.value.freeItemEachXReservations,
+            managerId: authStore.uuid
+        }
+
+        const res = await restaurantStore.createRestaurant(restaurantEntity)
+        if (res) {
+            router.push({ name: 'restaurants' });
+        }
     }
   };
 </script>
