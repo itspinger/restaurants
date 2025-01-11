@@ -184,19 +184,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessMessageDto validatePasswordResetToken(String token) {
-        final Optional<User> valid = this.userRepository.findByVerificationToken(token);
+    public SuccessMessageDto validatePasswordResetToken(UserPatchDto userDto,String token) {
+       final Optional<User> valid = this.userRepository.findByResetToken(token);
         if (valid.isEmpty()) {
             throw new NotFoundException("Password reset token does not exist");
         }
         final User user = valid.get();
-        //TODO ovde treba da se doda da sacuva nekako password
-        //Placeholeder
-        UserPatchDto userPatchDto = null;
-        String newPassword="";
-        userPatchDto.setPassword(newPassword);
-        this.patchUser(userPatchDto,user.getId());
-        user.setVerificationToken(null);
+
+        if (userDto.getPassword() != null) {
+            user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
+        }
         this.userRepository.save(user);
         return SuccessMessageDto.success("Successfully reseted your password!");
     }
@@ -284,7 +281,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendPasswordResetEmail(User user) {
+    public void sendPasswordResetEmail(String email) {
+        final User user = this.userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User does not exist"));
         final NotificationMessage dto = NotificationMessage.of(
             NotificationCategory.RESET_PASSWORD,
             user.getEmail(),

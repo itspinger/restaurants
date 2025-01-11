@@ -39,16 +39,14 @@ public class UserController {
     public ResponseEntity<UserDto> patch(@RequestBody @Valid UserPatchDto userDto, @PathVariable Long id) {
         return new ResponseEntity<>(this.userService.patchUser(userDto, id), HttpStatus.OK);
     }
-   /* @PostMapping("/reset-password")
-    public ResponseEntity<UserDto> sendMail(@RequestParam("email") String email) {
-        return new ResponseEntity<>(this.userService., HttpStatus.OK);
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> sendMail(@RequestParam("email") String email) {
+       this.userService.sendPasswordResetEmail(email);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    */
-    //TODO ne znam gde da posaljem mail za reset, ovo je za verification
-    @GetMapping("/reset-passwordVerification")
-    public ResponseEntity<SuccessMessageDto> resetPassword(@RequestParam("token") String token) {
-
-        return new ResponseEntity<>(this.userService.validatePasswordResetToken(token), HttpStatus.OK);
+    @PostMapping("/reset-passwordVerification")
+    public ResponseEntity<SuccessMessageDto> resetPassword(@RequestBody @Valid UserPatchDto userDto,@RequestParam("token") String token) {
+        return new ResponseEntity<>(this.userService.validatePasswordResetToken(userDto,token), HttpStatus.OK);
     }
 }

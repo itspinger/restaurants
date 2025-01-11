@@ -48,15 +48,16 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             final Long userId = this.jwtService.get(jwt, "userId", Long.class);
             final Long restaurantId = this.jwtService.get(jwt, "restaurantId", Long.class);
             final Collection<? extends GrantedAuthority> authorities = this.jwtService.extractAuthorities(jwt)
-                .stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+                    .stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
 
             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (username != null && authentication == null) {
                 if (this.jwtService.isTokenValid(jwt, username)) {
                     final AbstractAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+
                         new UserDetailsImpl(username, userId, restaurantId, authorities),
                         null,
                         authorities
