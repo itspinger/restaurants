@@ -21,17 +21,10 @@ public class NotificationMapper {
 
     public NotificationTypeDto notificationTypeDtoFromNotificationType(NotificationType notificationType) {
         final NotificationTypeDto notificationTypeDto = new NotificationTypeDto();
+        notificationTypeDto.setCategory(notificationType.getCategory());
         notificationTypeDto.setId(notificationType.getId());
         notificationTypeDto.setName(notificationType.getName());
         notificationTypeDto.setText(notificationType.getText());
         return notificationTypeDto;
-    }
-
-    public NotificationType notificationTypeFromNotificationTypeDto(NotificationTypeDto notificationTypeDto) {
-        final NotificationType notificationType = new NotificationType();
-        notificationType.setId(notificationTypeDto.getId());
-        notificationType.setName(notificationTypeDto.getName());
-        notificationType.setText(notificationTypeDto.getText());
-        return notificationType;
     }
 }

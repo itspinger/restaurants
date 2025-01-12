@@ -8,9 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
-@Table(name = "notification_type")
+@Table(name = "notification_types")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +19,10 @@ public class NotificationType {
     @GeneratedValue
     private Long id;
 
-    @Column(unique=true)
+    @Enumerated(EnumType.STRING)
+    @Column(unique = true, nullable = false)
+    private NotificationCategory category;
+
     private String name;
 
     // Text with placeholders which need to be replaced and sent to the user

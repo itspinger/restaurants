@@ -3,12 +3,11 @@ package raf.rs.notification.message.listener;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import raf.rs.notification.domain.Notification;
 import raf.rs.notification.domain.NotificationType;
-import raf.rs.notification.dto.NotificationRequestDto;
+import raf.rs.notification.dto.NotificationMessage;
 import raf.rs.notification.message.MessageHelper;
 import raf.rs.notification.service.NotificationService;
 import raf.rs.notification.service.NotificationTypeService;
@@ -31,18 +30,17 @@ public class NotificationListener {
     }
 
     private void handleNotificationRequest(Message message) throws JMSException {
-        final NotificationRequestDto notificationDto = this.helper.getMessage(message, NotificationRequestDto.class);
-        final NotificationType type = this.notificationTypeService.findByName(notificationDto.getType());
+        final NotificationMessage notificationDto = this.helper.getMessage(message, NotificationMessage.class);
+        final NotificationType type = this.notificationTypeService.findByCategory(notificationDto.category());
         if (type == null) {
             return;
         }
 
         final Notification notification = new Notification();
-        notification.setEmail(notificationDto.getEmail());
+        notification.setEmail(notificationDto.email());
         notification.setTimestamp(LocalDateTime.now());
         notification.setNotificationType(type);
-        notification.setText(type.getText().formatted(notificationDto.getArgs()));
-
+        notification.setText(type.getText().formatted(notificationDto.args()));
         this.notificationService.sendNotification(notification);
     }
 

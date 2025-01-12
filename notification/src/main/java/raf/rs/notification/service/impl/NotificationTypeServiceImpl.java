@@ -2,6 +2,7 @@ package raf.rs.notification.service.impl;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import raf.rs.notification.domain.NotificationCategory;
 import raf.rs.notification.domain.NotificationType;
 import raf.rs.notification.dto.NotificationTypeDto;
 import raf.rs.notification.exception.NotFoundException;
@@ -20,27 +21,16 @@ public class NotificationTypeServiceImpl implements NotificationTypeService {
     }
 
     @Override
-    public NotificationType findById(Long id) {
-        return this.repository.findById(id)
-            .orElseThrow(() -> new NotFoundException("Notification type with id %s not found".formatted(id)));
-    }
-
-    @Override
-    public NotificationType findByName(String name) {
-        return this.repository.findByName(name)
-            .orElseThrow(() -> new NotFoundException("Notification type with name %s not found".formatted(name)));
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        this.repository.deleteById(id);
+    public NotificationType findByCategory(NotificationCategory category) {
+        return this.repository.findByCategory(category)
+            .orElseThrow(() -> new NotFoundException("Notification does not exist with this category"));
     }
 
     @Override
     public NotificationTypeDto saveNotificationType(NotificationTypeDto notificationDto, Long id) {
         final NotificationType type = this.repository
             .findById(id)
-            .orElseThrow(() -> new NotFoundException("Notification type with id %s not found".formatted(id)));
+            .orElseThrow(() -> new NotFoundException("Notification type with id not found"));
 
         type.setName(notificationDto.getName());
         type.setText(notificationDto.getText());
@@ -55,5 +45,12 @@ public class NotificationTypeServiceImpl implements NotificationTypeService {
             .stream()
             .map(this.notificationMapper::notificationTypeDtoFromNotificationType)
             .toList();
+    }
+
+    @Override
+    public NotificationTypeDto findById(Long id) {
+        return this.repository.findById(id)
+            .map(this.notificationMapper::notificationTypeDtoFromNotificationType)
+            .orElseThrow(() -> new NotFoundException("Notification does not exist with this name"));
     }
 }

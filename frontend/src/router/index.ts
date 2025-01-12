@@ -10,6 +10,7 @@ import Restaurant from '@/views/Restaurant.vue'
 import Find from '@/views/Find.vue'
 import EditRestaurant from '@/views/EditRestaurant.vue'
 import Users from '@/views/Users.vue'
+import EditNotification from '@/views/EditNotification.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/notifications',
       name: 'notifications',
       component: Notifications,
+    },
+    {
+      path: '/notifications/edit/:id',
+      name: 'editNotifications',
+      component: EditNotification
     },
     {
       path: '/restaurants',

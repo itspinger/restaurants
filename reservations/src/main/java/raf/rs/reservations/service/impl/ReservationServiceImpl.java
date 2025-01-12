@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import io.github.resilience4j.retry.Retry;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,8 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import raf.rs.reservations.client.notificationservice.dto.NotificationRequestDto;
+import raf.rs.reservations.client.notificationservice.dto.NotificationCategory;
+import raf.rs.reservations.client.notificationservice.dto.NotificationMessage;
 import raf.rs.reservations.client.userservice.dto.UserDto;
 import raf.rs.reservations.domain.Appointment;
 import raf.rs.reservations.domain.Reservation;
@@ -29,7 +31,6 @@ import raf.rs.reservations.dto.ReservationCreateDto;
 import raf.rs.reservations.dto.ReservationFilterDto;
 import raf.rs.reservations.dto.RestaurantDto;
 import raf.rs.reservations.dto.SuccessMessageDto;
-import raf.rs.reservations.dto.TableDto;
 import raf.rs.reservations.exception.AlreadyExistsException;
 import raf.rs.reservations.exception.NotFoundException;
 import raf.rs.reservations.repository.AppointmentRepository;
@@ -38,6 +39,8 @@ import raf.rs.reservations.service.ReservationService;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private final ModelMapper modelMapper;
     private final TaskScheduler scheduler;
     private final AppointmentRepository appointmentRepository;
@@ -131,20 +134,22 @@ public class ReservationServiceImpl implements ReservationService {
         final LocalDateTime scheduledTime = reservation.getAppointment().getTime();
         final LocalDateTime reminderTime = scheduledTime.minusHours(1);
         final Instant reminderInstant = reminderTime.atZone(ZoneId.systemDefault()).toInstant();
+        final Table table = reservation.getAppointment().getTable();
 
         // Trenutno vreme je LocalDateTime.now()
         // Ako je reminderTime after LocalDateTime.now()
         // Onda zakazati, u suprotnom ne raditi nista
         if (reminderTime.isAfter(LocalDateTime.now())) {
             this.scheduler.schedule(() -> {
-                final NotificationRequestDto requestDto = NotificationRequestDto.of(
-                    "Reservation Reminder",
+                final NotificationMessage reminder = NotificationMessage.of(
+                    NotificationCategory.RESERVATION_REMINDER,
                     userDto.getEmail(),
                     userDto.getFirstName(),
-                    reservation.getAppointment().getTable().getId()
+                    table.getId(),
+                    table.getRestaurant().getName()
                 );
 
-                this.jmsTemplate.convertAndSend(this.destination, requestDto);
+                this.jmsTemplate.convertAndSend(this.destination, reminder);
             }, reminderInstant);
         }
     }
@@ -173,22 +178,23 @@ public class ReservationServiceImpl implements ReservationService {
                 throw new InternalError();
             }
 
-            final NotificationRequestDto managerMesage = NotificationRequestDto.of(
-                "Client cancelled a reservation",
+            final NotificationMessage managerMesage = NotificationMessage.of(
+                NotificationCategory.CLIENT_CANCELLATION,
                 managerDto.getEmail(),
-                appointment.getTime(),
-                table.getId()
+                managerDto.getFirstName(),
+                table.getId(),
+                FORMATTER.format(appointment.getTime())
             );
 
             this.jmsTemplate.convertAndSend(this.destination, managerMesage);
             return SuccessMessageDto.success("Successfully cancelled the reservation");
         }
 
-        final NotificationRequestDto clientMessage = NotificationRequestDto.of(
-            "Manager cancelled your reservation",
+        final NotificationMessage clientMessage = NotificationMessage.of(
+            NotificationCategory.MANAGER_CANCELLATION,
             clientDto.getEmail(),
-            appointment.getTime(),
-            table.getId()
+            restaurant.getName(),
+            FORMATTER.format(appointment.getTime())
         );
 
         this.jmsTemplate.convertAndSend(this.destination, clientMessage);
@@ -227,18 +233,20 @@ public class ReservationServiceImpl implements ReservationService {
 
     private void sendNotifications(UserDto dto, UserDto managerDto, boolean benefits, Restaurant restaurant, Appointment appointment) {
         if (benefits) {
-            final NotificationRequestDto clientMessage = NotificationRequestDto.of(
-                "Reservation Confirmed (With Benefits)",
+            final NotificationMessage clientMessage = NotificationMessage.of(
+                NotificationCategory.RESERVATION_CONFIRM_BENEFITS,
                 dto.getEmail(),
-                LocalDateTime.now(),
+                dto.getFirstName(),
+                restaurant.getName(),
+                FORMATTER.format(appointment.getTime()),
                 appointment.getTable().getId()
             );
 
-            final NotificationRequestDto managerMessage = NotificationRequestDto.of(
-                "Client created a reservation with benefits",
+            final NotificationMessage managerMessage = NotificationMessage.of(
+                NotificationCategory.CLIENT_RESERVATION_CREATE_BENEFITS,
                 managerDto.getEmail(),
                 managerDto.getFirstName(),
-                LocalDateTime.now(),
+                FORMATTER.format(appointment.getTime()),
                 appointment.getTable().getId()
             );
 
@@ -247,19 +255,19 @@ public class ReservationServiceImpl implements ReservationService {
             return;
         }
 
-        final NotificationRequestDto clientMessage = NotificationRequestDto.of(
-            "Reservation Confirmed",
+        final NotificationMessage clientMessage = NotificationMessage.of(
+            NotificationCategory.RESERVATION_CONFIRM,
             dto.getEmail(),
             dto.getFirstName(),
             restaurant.getName(),
-            LocalDateTime.now(),
+            FORMATTER.format(appointment.getTime()),
             appointment.getTable().getId()
         );
 
-        final NotificationRequestDto managerMessage = NotificationRequestDto.of(
-            "Client created a reservation",
+        final NotificationMessage managerMessage = NotificationMessage.of(
+            NotificationCategory.CLIENT_RESERVATION_CREATE,
             managerDto.getEmail(),
-            LocalDateTime.now(),
+            FORMATTER.format(appointment.getTime()),
             appointment.getTable().getId()
         );
 
@@ -271,7 +279,7 @@ public class ReservationServiceImpl implements ReservationService {
         final ResponseEntity<UserDto> responseEntity;
         System.out.println("[" + System.currentTimeMillis() / 1000 + "] Getting user for id: " +userId );
         try {
-            Thread.sleep(9000);
+            Thread.sleep(4000);
             responseEntity = this.userServiceRestTemplate.exchange("/user/%s".formatted(userId), HttpMethod.GET, null, UserDto.class);
         } catch (HttpClientErrorException e) {
             System.out.println("HTTP Status: " + e.getStatusCode());

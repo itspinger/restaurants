@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.List;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import raf.rs.restaurants.userservice.client.notificationservice.dto.NotificationRequestDto;
+import raf.rs.restaurants.userservice.client.notificationservice.dto.NotificationCategory;
+import raf.rs.restaurants.userservice.client.notificationservice.dto.NotificationMessage;
 import raf.rs.restaurants.userservice.domain.Client;
 import raf.rs.restaurants.userservice.domain.Manager;
 import raf.rs.restaurants.userservice.domain.User;
@@ -273,8 +273,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void sendVerificationEmail(User user) {
-        final NotificationRequestDto dto = NotificationRequestDto.of(
-            "Email Verification",
+        final NotificationMessage dto = NotificationMessage.of(
+            NotificationCategory.EMAIL_VERIFICATION,
             user.getEmail(),
             user.getUsername(),
             "http://localhost:8084/user-service/api/verify-email?token=%s".formatted(user.getVerificationToken())
@@ -285,14 +285,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendPasswordResetEmail(User user) {
-            final NotificationRequestDto dto = NotificationRequestDto.of(
-                    "Password Reset",
-                    user.getEmail(),
-                    user.getUsername(),
-                    "http://localhost:8084/user-service/api/user/reset-password?token=%s".formatted(user.getResetToken())
-            );
+        final NotificationMessage dto = NotificationMessage.of(
+            NotificationCategory.RESET_PASSWORD,
+            user.getEmail(),
+            user.getUsername(),
+            "http://localhost:8084/user-service/api/user/reset-password?token=%s".formatted(user.getResetToken())
+        );
 
-            this.jmsTemplate.convertAndSend(this.destination, dto);
+        this.jmsTemplate.convertAndSend(this.destination, dto);
     }
 
     private void checkExists(UserCreateDto dto) {

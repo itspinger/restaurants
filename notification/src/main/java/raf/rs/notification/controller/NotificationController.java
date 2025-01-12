@@ -47,11 +47,9 @@ public class NotificationController {
         return ResponseEntity.ok(this.notificationTypeService.findAll());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @DeleteMapping("/type/{notificationId}")
-    public ResponseEntity<Void> deleteNotification(@PathVariable Long notificationId) {
-        this.notificationTypeService.deleteById(notificationId);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    @GetMapping("/types/{typeId}")
+    public ResponseEntity<NotificationTypeDto> getNotificationType(@PathVariable Long typeId) {
+        return ResponseEntity.ok(this.notificationTypeService.findById(typeId));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

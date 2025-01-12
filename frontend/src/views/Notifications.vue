@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="w-full py-8 px-4">
       <!-- Loading and Error States -->
       <div v-if="error" class="text-red-600 bg-red-100 border-l-4 border-red-500 p-4 mb-4">
         {{ error }}
@@ -7,37 +7,71 @@
 
       <h2 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Notifications</h2>
       <div v-if="isLoading" class="text-center text-gray-500">Loading notifications...</div>
-  
-      <!-- Filters -->
-      <div v-if="!isLoading" class="mb-6 flex items-center space-x-4">
-        <div class="w-1/4 px-4">
-          <label for="notificationType" class="block text-sm font-medium text-gray-700">Notification Type</label>
-          <select v-model="filters.type" id="notificationType" class="mt-1 block w-full border-gray-300 shadow-sm sm:text-sm">
+
+      <div class="flex flex-wrap gap-4 justify-center items-center">
+        <!-- Notification Type Filter -->
+        <div>
+          <label for="notificationType" class="text-gray-500">Notification Type: </label>
+          <select
+            id="notificationType"
+            v-model="filters.type"
+            class="border border-gray-300 rounded-lg p-2"
+          >
             <option value="">All</option>
-            <option v-for="type in notificationTypes" :key="type.id" :value="type.id">
-              {{ type.name }}
+            <option
+              v-for="type in notificationTypes"
+              :key="type.id"
+              :value="type.id"
+            >
+              {{ type.category }}
             </option>
           </select>
         </div>
-  
-        <div class="w-1/4 px-4">
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input type="email" v-model="filters.email" id="email" class="mt-1 block w-full border-gray-300 shadow-sm sm:text-sm" placeholder="Email" />
-        </div>
-  
-        <div class="w-1/4 px-4">
-          <label for="startDate" class="block text-sm font-medium text-gray-700">Start Date</label>
-          <input type="date" v-model="filters.startDate" id="startDate" class="mt-1 block w-full border-gray-300 shadow-sm sm:text-sm" />
-        </div>
-  
-        <div class="w-1/4 px-4">
-          <label for="endDate" class="block text-sm font-medium text-gray-700">End Date</label>
-          <input type="date" v-model="filters.endDate" id="endDate" class="mt-1 block w-full border-gray-300 shadow-sm sm:text-sm" />
+
+        <!-- Email Filter -->
+        <div>
+          <label for="email" class="text-gray-500">Email: </label>
+          <input
+            id="email"
+            type="email"
+            v-model="filters.email"
+            class="border border-gray-300 rounded-lg p-2"
+            placeholder="Email"
+          />
         </div>
 
-        <button @click="applyFilters" class="text-xs bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-all">Filter</button>
+        <!-- Start Date Filter -->
+        <div>
+          <label for="startDate" class="text-gray-500">Start Date: </label>
+          <input
+            id="startDate"
+            type="date"
+            v-model="filters.startDate"
+            class="border border-gray-300 rounded-lg p-2"
+          />
+        </div>
+
+        <!-- End Date Filter -->
+        <div>
+          <label for="endDate" class="text-gray-500">End Date: </label>
+          <input
+            id="endDate"
+            type="date"
+            v-model="filters.endDate"
+            class="border border-gray-300 rounded-lg p-2"
+          />
+        </div>
+
+        <!-- Apply Filters Button -->
+        <button
+          @click="applyFilters"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Apply Filters
+        </button>
       </div>
-  
+    </div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Notifications List -->
       <ul v-if="!isLoading && notifications && notifications.length > 0" class="space-y-6">
         <li
@@ -63,7 +97,7 @@
       <p v-else class="text-center text-gray-500">No notifications to show.</p>
     </div>
 
-    <Pagination v-slot="{ page }" :total="totalElements" :sibling-count="1" show-edges :default-page="currentPage" :items-per-page="pageSize">
+    <Pagination v-slot="{ page }" :total="totalElements" :sibling-count="1" show-edges :default-page="currentPage" :items-per-page="pageSize" class="py-6">
       <PaginationList v-slot="{ items }" class="flex items-center justify-center gap-1">
         <PaginationFirst @click="onPageClick(1)" />
         <PaginationPrev @click="onPageClick(currentPage - 1)" />
@@ -80,6 +114,21 @@
         <PaginationNext @click="onPageClick(currentPage + 1)" />
       </PaginationList>
     </Pagination>
+
+    <div v-if="authStore.isAdmin" class="container mx-auto outline outline-2 outline-indigo-500 rounded-lg border bg-card hover:shadow-xl cursor-pointer">
+      <h3 class="text-xl font-bold text-gray-700 mb-4 text-center">Manage Notification Types</h3>
+      <div class="grid grid-cols-2 justify-between items-center gap-5 py-5 m-5">
+        <div
+          v-for="type in notificationTypes"
+          :key="type.id"
+          @click="navigateToEdit(type.id)"
+          class="p-4 bg-white border rounded-lg shadow cursor-pointer hover:shadow-md transition-shadow duration-300"
+        >
+          <h4 class="text-lg font-semibold text-gray-800">{{ type.category }}</h4>
+          <p class="text-sm text-gray-600">{{ type.name }}</p>
+        </div>
+      </div>
+    </div>
 </template>
 
 
@@ -88,6 +137,7 @@ import { ref, onMounted, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { requestFromApi } from "@/utils/api";
 import { Button } from '@/components/ui/button'
+import { useRouter } from "vue-router";
 
 import {
   Pagination,
@@ -101,6 +151,7 @@ import {
 
 interface NotificationTypeDto {
   id: number;
+  category: string;
   name: string;
   text: string;
 }
@@ -130,6 +181,8 @@ const notificationTypes = ref<NotificationTypeDto[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(20);  // Adjust this as needed
 const totalElements = ref(0);  // Use from API response
+
+const router = useRouter();
 
 const fetchNotifications = async (filters: Filters) => {
   isLoading.value = true;
@@ -169,6 +222,10 @@ const fetchNotifications = async (filters: Filters) => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const navigateToEdit = (typeId: number) => {
+  router.push(`/notifications/edit/${typeId}`);
 };
 
 const applyFilters = () => {
