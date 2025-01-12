@@ -68,6 +68,11 @@
                 Sign up
               </RouterLink>
             </p>
+            <p class="text-sm text-center text-gray-400">
+              <RouterLink to="/reset-password" class="text-indigo-400 focus:outline-none focus:underline focus:text-indigo-500 dark:focus:border-indigo-800">
+                Forgot your password?
+              </RouterLink>
+            </p>
           </form>
         </div>
       </div>

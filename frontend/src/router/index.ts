@@ -11,6 +11,8 @@ import Find from '@/views/Find.vue'
 import EditRestaurant from '@/views/EditRestaurant.vue'
 import Users from '@/views/Users.vue'
 import EditNotification from '@/views/EditNotification.vue'
+import ResetPassword from '@/views/ResetPassword.vue'
+import ChangePassword from '@/views/ChangePassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,6 +51,16 @@ const router = createRouter({
       path: '/restaurant/edit/:id',
       name: 'restaurantEdit',
       component: EditRestaurant
+    },
+    {
+      path: '/reset-password',
+      name: 'resetPassword',
+      component: ResetPassword
+    },
+    {
+      path: '/changePassword',
+      name: 'changePassword',
+      component: ChangePassword,
     },
     {
       path: '/find',

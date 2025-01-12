@@ -22,6 +22,7 @@ import raf.rs.restaurants.userservice.client.notificationservice.dto.Notificatio
 import raf.rs.restaurants.userservice.domain.Client;
 import raf.rs.restaurants.userservice.domain.Manager;
 import raf.rs.restaurants.userservice.domain.User;
+import raf.rs.restaurants.userservice.dto.PasswordDto;
 import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
@@ -92,8 +93,6 @@ public class UserServiceImpl implements UserService {
     public UserDto createClient(UserCreateDto userCreateDto) {
         this.checkExists(userCreateDto);
 
-        System.out.println(userCreateDto.getBirthDate());
-
         final Client client = this.modelMapper.map(userCreateDto, Client.class);
         final String token = UUID.randomUUID().toString();
         client.setPassword(this.passwordEncoder.encode(userCreateDto.getPassword()));
@@ -136,7 +135,6 @@ public class UserServiceImpl implements UserService {
         claims.put("userId", user.getId());
         claims.put("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
 
-
         final TokenResponseDto dto = new TokenResponseDto();
         dto.setToken(this.tokenService.generate(claims));
         dto.setUser(this.modelMapper.map(user, UserDto.class));
@@ -159,14 +157,11 @@ public class UserServiceImpl implements UserService {
         final User user = this.findUserById(id);
         if (!(user instanceof Client client)) {
             throw new NotClientException();
-
         }
 
         client.setReservationCount(client.getReservationCount() - 1);
         this.userRepository.save(user);
     }
-
-
 
     @Override
     public SuccessMessageDto validateVerificationToken(String token) {
@@ -174,7 +169,6 @@ public class UserServiceImpl implements UserService {
         if (valid.isEmpty()) {
             throw new NotFoundException("Verification token does not exist");
         }
-
 
         final User user = valid.get();
         user.setActivated(true);
@@ -184,18 +178,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public SuccessMessageDto validatePasswordResetToken(UserPatchDto userDto,String token) {
-       final Optional<User> valid = this.userRepository.findByResetToken(token);
+    public SuccessMessageDto changePassword(PasswordDto passwordDto, String token) {
+        final Optional<User> valid = this.userRepository.findByResetToken(token);
         if (valid.isEmpty()) {
             throw new NotFoundException("Password reset token does not exist");
         }
-        final User user = valid.get();
 
-        if (userDto.getPassword() != null) {
-            user.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
+        final User user = valid.get();
+        if (passwordDto.getPassword() != null) {
+            user.setPassword(this.passwordEncoder.encode(passwordDto.getPassword()));
         }
+
+        user.setResetToken(null);
         this.userRepository.save(user);
-        return SuccessMessageDto.success("Successfully reseted your password!");
+        return SuccessMessageDto.success("Successfully reset your password!");
     }
 
     @Override
@@ -244,8 +240,6 @@ public class UserServiceImpl implements UserService {
         }
 
         if (user instanceof Manager manager) {
-
-
             if (userDto.getStartDate() != null) {
                 final LocalDate startDate = userDto.validateDate(userDto.getStartDate());
                 manager.setStartDate(startDate);
@@ -281,16 +275,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void sendPasswordResetEmail(String email) {
-        final User user = this.userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User does not exist"));
+    public SuccessMessageDto resetPassword(String email) {
+        final User user = this.userRepository
+            .findByEmail(email)
+            .orElseThrow(() -> new NotFoundException("Email does not exist"));
+
+        user.setResetToken(UUID.randomUUID().toString());
+        this.userRepository.save(user);
+
         final NotificationMessage dto = NotificationMessage.of(
             NotificationCategory.RESET_PASSWORD,
             user.getEmail(),
             user.getUsername(),
-            "http://localhost:8084/user-service/api/user/reset-password?token=%s".formatted(user.getResetToken())
+            "http://localhost:5173/changePassword?token=%s".formatted(user.getResetToken())
         );
 
         this.jmsTemplate.convertAndSend(this.destination, dto);
+        return SuccessMessageDto.success("Successfully sent the verification link!");
     }
 
     private void checkExists(UserCreateDto dto) {

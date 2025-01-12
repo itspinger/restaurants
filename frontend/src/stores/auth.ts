@@ -84,6 +84,45 @@ export const useAuthStore = defineStore('auth', {
         return true;
       },
 
+      async requestPasswordReset(email: string) {
+          if (this.uuid) {
+            return false;
+          }
+
+          const response = await requestFromApi<{ success: boolean}>(
+             'post',
+             `user-service/api/user/reset-password?email=${email}`
+          );
+
+          if (!response) {
+             useNotify().show('Failed to find email for this user', 'error');
+             return false;
+          }
+
+          useNotify().show('Successfully started the verification process, check your inbox!', 'success')
+          return true;
+      },
+
+      async resetPassword(password: string, token: string) {
+          if (this.uuid) {
+            return false;
+          }
+
+          const response = await requestFromApi<{ success: boolean }>(
+             'post',
+             `user-service/api/user/changePassword?token=${token}`,
+             { password }
+          )
+
+          if (!response) {
+             useNotify().show('Failed to change password', 'error');
+             return false;
+          }
+
+          useNotify().show('Successfully changed the password', 'success');
+          return true;
+      },
+
       async fetchSelfUser() {
         if (!this.uuid) {
           return null;

@@ -1,12 +1,10 @@
 package raf.rs.restaurants.userservice.service;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatusCode;
-import raf.rs.restaurants.userservice.domain.User;
+import raf.rs.restaurants.userservice.dto.PasswordDto;
 import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
 import raf.rs.restaurants.userservice.dto.TokenRequestDto;
 import raf.rs.restaurants.userservice.dto.TokenResponseDto;
@@ -33,9 +31,9 @@ public interface UserService {
 
     SuccessMessageDto validateVerificationToken(String token);
 
-    SuccessMessageDto validatePasswordResetToken(UserPatchDto userDto,String token);
+    SuccessMessageDto changePassword(PasswordDto passwordDto, String token);
 
-    void sendPasswordResetEmail(String email);
+    SuccessMessageDto resetPassword(String email);
 
     SuccessMessageDto ban(Long userId);
 

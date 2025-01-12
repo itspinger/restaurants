@@ -262,6 +262,7 @@
     const params = new URLSearchParams();
     params.append('page', (currentPage.value - 1).toString())
     params.append('restaurantId', restaurant.value.id.toString());
+    params.append('available', 'true');
     if (authStore.isClient && authStore.uuid) {
         params.append('userId', authStore.uuid.toString());
     }

@@ -41,13 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> sendMail(@RequestParam("email") String email) {
-       this.userService.sendPasswordResetEmail(email);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<SuccessMessageDto> changePassword(@RequestParam("email") String email) {
+        return new ResponseEntity<>(this.userService.resetPassword(email), HttpStatus.OK);
     }
 
-    @PostMapping("/reset-passwordVerification")
-    public ResponseEntity<SuccessMessageDto> resetPassword(@RequestBody @Valid UserPatchDto userDto,@RequestParam("token") String token) {
-        return new ResponseEntity<>(this.userService.validatePasswordResetToken(userDto,token), HttpStatus.OK);
+    @PostMapping("/changePassword")
+    public ResponseEntity<SuccessMessageDto> changePassword(@RequestBody @Valid PasswordDto passwordDto, @RequestParam("token") String token) {
+        return new ResponseEntity<>(this.userService.changePassword(passwordDto, token), HttpStatus.OK);
     }
 }
