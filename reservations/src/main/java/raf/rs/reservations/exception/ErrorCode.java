@@ -6,5 +6,6 @@ public enum ErrorCode {
     FORBIDDEN,
     INVALID_DATA,
     NOT_FOUND,
-    INTERNAL_ERROR
+    INTERNAL_ERROR,
+    DUPLICATE_DATA
 }

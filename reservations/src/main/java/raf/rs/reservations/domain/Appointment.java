@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@jakarta.persistence.Table(name = "appointment")
+@jakarta.persistence.Table(name = "appointment", uniqueConstraints =  @UniqueConstraint(columnNames = {"time", "table_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,5 +23,6 @@ public class Appointment {
     private LocalDateTime time;
 
     @ManyToOne
+    @JoinColumn(name = "table_id", nullable = false)
     private Table table;
 }

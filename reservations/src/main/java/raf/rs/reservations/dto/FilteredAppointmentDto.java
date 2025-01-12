@@ -1,21 +1,16 @@
 package raf.rs.reservations.dto;
 
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppointmentDto {
+public class FilteredAppointmentDto extends AppointmentDto {
 
-    private Long id;
-
-    private LocalDateTime time;
-
-    private TableDto table;
+    private RestaurantDto restaurant;
 
 }

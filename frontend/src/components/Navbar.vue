@@ -10,11 +10,11 @@
           <NavItem to="/">Home</NavItem>
           <NavItem to="/find">Book Now</NavItem>
           <NavItem to="/restaurants">Restaurants</NavItem>
+          <NavItem v-if="authStore.isAdmin" to="/manage/users">Users</NavItem>
           <NavItem v-if="authStore.isLoggedIn" to="/notifications">Notifications</NavItem>
           <NavItem v-if="authStore.isLoggedIn && !authStore.isAdmin" to="/profile">Edit Profile</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/login">Login</NavItem>
           <NavItem v-if="!authStore.isLoggedIn" to="/register">Register</NavItem>
-          <NavItem v-if="authStore.isClient" to="/">Client</NavItem>
 
           <button 
               v-if="authStore.isLoggedIn"

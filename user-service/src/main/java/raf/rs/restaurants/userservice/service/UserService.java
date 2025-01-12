@@ -3,6 +3,8 @@ package raf.rs.restaurants.userservice.service;
 import jakarta.validation.Valid;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import raf.rs.restaurants.userservice.domain.User;
 import raf.rs.restaurants.userservice.dto.SuccessMessageDto;
@@ -14,7 +16,7 @@ import raf.rs.restaurants.userservice.dto.UserPatchDto;
 
 public interface UserService {
 
-    List<UserDto> findAll();
+    Page<UserDto> findAll(Pageable pageable);
 
     UserDto findById(Long id);
 

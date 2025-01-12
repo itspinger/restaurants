@@ -12,6 +12,7 @@ public class ModelConfiguration {
         final ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setFieldMatchingEnabled(true);
         modelMapper.getConfiguration().setPreferNestedProperties(false);
+        modelMapper.getConfiguration().setCollectionsMergeEnabled(false);
         return modelMapper;
     }
 }

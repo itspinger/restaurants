@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +47,7 @@ public class RestaurantDto {
     @Min(-1)
     @NotNull
     private int freeItemEachXReservations;
+
     @NotNull
     private Long managerId;
 }

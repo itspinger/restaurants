@@ -3,6 +3,7 @@
   <RouterView />
   <!-- Za sve vrste notifikacija ovo je template -->
   <VNotifications />
+  <ModalsContainer />
 </template>
 
 <script setup lang="ts">
@@ -11,6 +12,7 @@
   import { useAuthStore } from '@/stores/auth';
   import { onMounted } from 'vue';
   import Navbar from '@/components/Navbar.vue';
+  import { ModalsContainer } from 'vue-final-modal'
 
   // Koristimo local storage da bismo ucitali token (ako je korisnik ulogovan naravno)
   onMounted(async () => {

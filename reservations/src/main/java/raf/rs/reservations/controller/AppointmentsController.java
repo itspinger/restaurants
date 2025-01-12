@@ -1,6 +1,7 @@
 package raf.rs.reservations.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import raf.rs.reservations.dto.AppointmentCreateDto;
 import raf.rs.reservations.dto.AppointmentDto;
 import raf.rs.reservations.dto.AppointmentFilterDto;
+import raf.rs.reservations.dto.FilteredAppointmentDto;
 import raf.rs.reservations.service.AppointmentService;
 import raf.rs.reservations.service.RestaurantService;
 
@@ -33,7 +35,8 @@ public class AppointmentsController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AppointmentDto>> getAllAppointments(AppointmentFilterDto filterDto, Pageable pageable) {
+    public ResponseEntity<Page<FilteredAppointmentDto>> getAllAppointments(AppointmentFilterDto filterDto, Pageable pageable) {
         return new ResponseEntity<>(this.appointmentService.findAvailableAppointments(filterDto, pageable), HttpStatus.OK);
     }
+
 }

@@ -68,7 +68,6 @@
           :key="restaurant.id"
           :id="restaurant.id"
           :restaurant="restaurant"
-          @delete="onItemDeleted(restaurant)"
         />
       </div>
     </div>
@@ -76,13 +75,10 @@
   
   <script setup lang="ts">
   import { ref, onMounted, watch } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
   import { useRestaurantStore } from '@/stores/restaurantStore'
   import { useAuthStore } from '@/stores/auth'
   import { Button } from '@/components/ui/button'
-  import Restaurant from '@/types/restaurant'
   import RestaurantCard from '@/components/RestaurantCard.vue'
-  import Dialog from '@/components/Dialog.vue'
 
   import {
     Pagination,
@@ -93,9 +89,6 @@
     PaginationNext,
     PaginationPrev,
   } from '@/components/ui/pagination'
-  
-  const route = useRoute()
-  const router = useRouter()
   
   const restaurantStore = useRestaurantStore()
   const authStore = useAuthStore()
@@ -108,15 +101,6 @@
     loading.value = true
     await restaurantStore.fetchRestaurants(currentPage.value - 1)
     loading.value = false
-  }
-  
-  // Handle item deletion
-  const onItemDeleted = async (restaurant: Restaurant) => {
-    const deleted = await restaurantStore.deleteRestaurant(restaurant.id)
-    if (!deleted) {
-      return;
-    }
-    await fetchRestaurants()
   }
   
   // Watch for route changes

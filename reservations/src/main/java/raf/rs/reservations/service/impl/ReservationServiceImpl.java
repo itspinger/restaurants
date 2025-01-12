@@ -5,7 +5,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import io.github.resilience4j.retry.Retry;
+import java.util.List;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jms.core.JmsTemplate;
@@ -17,9 +21,15 @@ import raf.rs.reservations.client.notificationservice.dto.NotificationRequestDto
 import raf.rs.reservations.client.userservice.dto.UserDto;
 import raf.rs.reservations.domain.Appointment;
 import raf.rs.reservations.domain.Reservation;
+import raf.rs.reservations.dto.AppointmentDto;
+import raf.rs.reservations.dto.ReservationDto;
 import raf.rs.reservations.domain.Restaurant;
 import raf.rs.reservations.domain.Table;
 import raf.rs.reservations.dto.ReservationCreateDto;
+import raf.rs.reservations.dto.ReservationFilterDto;
+import raf.rs.reservations.dto.RestaurantDto;
+import raf.rs.reservations.dto.SuccessMessageDto;
+import raf.rs.reservations.dto.TableDto;
 import raf.rs.reservations.exception.AlreadyExistsException;
 import raf.rs.reservations.exception.NotFoundException;
 import raf.rs.reservations.repository.AppointmentRepository;
@@ -28,6 +38,7 @@ import raf.rs.reservations.service.ReservationService;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
+    private final ModelMapper modelMapper;
     private final TaskScheduler scheduler;
     private final AppointmentRepository appointmentRepository;
     private final ReservationRepository reservationRepository;
@@ -37,13 +48,14 @@ public class ReservationServiceImpl implements ReservationService {
     private final Retry userRetry;
 
     public ReservationServiceImpl(
-            TaskScheduler scheduler,
-            AppointmentRepository appointmentRepository,
-            ReservationRepository reservationRepository,
-            RestTemplate userServiceRestTemplate,
-            JmsTemplate jmsTemplate,
-            @Value("${destination.sendMail}") String destination, Retry userRetry
+        ModelMapper modelMapper, TaskScheduler scheduler,
+        AppointmentRepository appointmentRepository,
+        ReservationRepository reservationRepository,
+        RestTemplate userServiceRestTemplate,
+        JmsTemplate jmsTemplate,
+        @Value("${destination.sendMail}") String destination, Retry userRetry
     ) {
+        this.modelMapper = modelMapper;
         this.scheduler = scheduler;
         this.appointmentRepository = appointmentRepository;
         this.reservationRepository = reservationRepository;
@@ -59,7 +71,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void createReservation(ReservationCreateDto reservationCreateDto) {
+    public SuccessMessageDto createReservation(ReservationCreateDto reservationCreateDto) {
         final Long appointmentId = reservationCreateDto.getAppointmentId();
         final Appointment appointment = this.appointmentRepository
             .findById(appointmentId)
@@ -105,6 +117,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         this.scheduleReminder(userDto, reservation);
+        return SuccessMessageDto.success("Successfully created a reservation for you");
     }
 
     private Reservation createReservation(ReservationCreateDto dto, Appointment appointment) {
@@ -137,7 +150,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void cancelReservation(Long reservationId, boolean userCancelled) {
+    public SuccessMessageDto cancelReservation(Long reservationId, boolean userCancelled) {
         final Reservation reservation = this.findReservationById(reservationId);
         final Appointment appointment = reservation.getAppointment();
         final Table table = appointment.getTable();
@@ -168,7 +181,7 @@ public class ReservationServiceImpl implements ReservationService {
             );
 
             this.jmsTemplate.convertAndSend(this.destination, managerMesage);
-            return;
+            return SuccessMessageDto.success("Successfully cancelled the reservation");
         }
 
         final NotificationRequestDto clientMessage = NotificationRequestDto.of(
@@ -179,11 +192,36 @@ public class ReservationServiceImpl implements ReservationService {
         );
 
         this.jmsTemplate.convertAndSend(this.destination, clientMessage);
+        return SuccessMessageDto.success("Successfully cancelled the reservation");
+    }
+
+    @Override
+    public Page<ReservationDto> findAll(ReservationFilterDto filterDto, Pageable pageable) {
+        final Page<Reservation> reservations = this.reservationRepository.findAvailableReservations(filterDto, pageable);
+
+        return reservations.map(reservation -> {
+            final ReservationDto dto = new ReservationDto();
+            dto.setId(reservation.getId());
+            dto.setUserId(reservation.getUserId());
+            dto.setRestaurant(this.shallowMap(reservation.getAppointment().getTable().getRestaurant()));
+            dto.setAppointment(this.shallowMap(reservation.getAppointment()));
+            return dto;
+        });
+    }
+
+    private RestaurantDto shallowMap(Restaurant restaurant) {
+        // Ignore the tables, we will not serialize it
+        restaurant.setTables(List.of());
+        return this.modelMapper.map(restaurant, RestaurantDto.class);
+    }
+
+    private AppointmentDto shallowMap(Appointment appointment) {
+        return this.modelMapper.map(appointment, AppointmentDto.class);
     }
 
     private boolean hasAppliedBenefits(int reservationCount, Restaurant restaurant) {
         final boolean discount = restaurant.getFreeItemEachXReservations() != -1 && reservationCount >= restaurant.getDiscountAfterXReservations();
-        final boolean freeItem = restaurant.getFreeItemEachXReservations() != -1 && restaurant.getFreeItemEachXReservations() % reservationCount == 0;
+        final boolean freeItem = restaurant.getFreeItemEachXReservations() == 0 || (restaurant.getFreeItemEachXReservations() != -1 && restaurant.getFreeItemEachXReservations() % reservationCount == 0);
         return discount || freeItem;
     }
 
@@ -192,7 +230,6 @@ public class ReservationServiceImpl implements ReservationService {
             final NotificationRequestDto clientMessage = NotificationRequestDto.of(
                 "Reservation Confirmed (With Benefits)",
                 dto.getEmail(),
-                restaurant.getName(),
                 LocalDateTime.now(),
                 appointment.getTable().getId()
             );
@@ -200,6 +237,7 @@ public class ReservationServiceImpl implements ReservationService {
             final NotificationRequestDto managerMessage = NotificationRequestDto.of(
                 "Client created a reservation with benefits",
                 managerDto.getEmail(),
+                managerDto.getFirstName(),
                 LocalDateTime.now(),
                 appointment.getTable().getId()
             );
@@ -212,6 +250,7 @@ public class ReservationServiceImpl implements ReservationService {
         final NotificationRequestDto clientMessage = NotificationRequestDto.of(
             "Reservation Confirmed",
             dto.getEmail(),
+            dto.getFirstName(),
             restaurant.getName(),
             LocalDateTime.now(),
             appointment.getTable().getId()

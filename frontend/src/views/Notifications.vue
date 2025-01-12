@@ -63,7 +63,7 @@
       <p v-else class="text-center text-gray-500">No notifications to show.</p>
     </div>
 
-    <Pagination v-slot="{ page }" :total="totalPages" :sibling-count="1" show-edges :default-page="currentPage" :items-per-page="pageSize">
+    <Pagination v-slot="{ page }" :total="totalElements" :sibling-count="1" show-edges :default-page="currentPage" :items-per-page="pageSize">
       <PaginationList v-slot="{ items }" class="flex items-center justify-center gap-1">
         <PaginationFirst @click="onPageClick(1)" />
         <PaginationPrev @click="onPageClick(currentPage - 1)" />
@@ -87,6 +87,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { requestFromApi } from "@/utils/api";
+import { Button } from '@/components/ui/button'
 
 import {
   Pagination,
@@ -128,7 +129,7 @@ const filters = ref<Filters>({});
 const notificationTypes = ref<NotificationTypeDto[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(20);  // Adjust this as needed
-const totalPages = ref(0);  // Use from API response
+const totalElements = ref(0);  // Use from API response
 
 const fetchNotifications = async (filters: Filters) => {
   isLoading.value = true;
@@ -153,14 +154,16 @@ const fetchNotifications = async (filters: Filters) => {
 
     console.log(queryParams);
 
-    const response = await requestFromApi<{ content: Notification[]} >("get", queryParams);
+    const response = await requestFromApi<{ content: Notification[], totalElements: number } >("get", queryParams);
 
     if (!response) {
       error.value = "Failed to load notifications.";
       return;
     }
 
+    console.log(response.totalElements)
     notifications.value = response.content;
+    totalElements.value = response.totalElements;
   } catch (err: any) {
     error.value = err.message || "An error occurred while fetching notifications.";
   } finally {

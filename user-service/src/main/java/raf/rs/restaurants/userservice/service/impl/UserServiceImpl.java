@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,16 +71,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> findAll() {
-        return this.userRepository.findAll()
-            .stream()
+    public Page<UserDto> findAll(Pageable pageable) {
+        return this.userRepository.findAll(pageable)
             .map((user) -> {
                 System.out.println(user.getAuthorities());
                 final UserDto map = this.modelMapper.map(user, UserDto.class);
                 System.out.println(map.getRoles());
                 return map;
-            })
-            .toList();
+            });
     }
 
     @Override
@@ -87,8 +87,6 @@ public class UserServiceImpl implements UserService {
             .map((user) -> this.modelMapper.map(user, UserDto.class))
             .orElseThrow(() -> new NotFoundException("User does not exist"));
     }
-
-
 
     @Override
     public UserDto createClient(UserCreateDto userCreateDto) {

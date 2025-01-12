@@ -1,6 +1,7 @@
 package raf.rs.reservations.service.impl;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import raf.rs.reservations.dto.RestaurantCreateDto;
 import raf.rs.reservations.dto.RestaurantDto;
 import raf.rs.reservations.dto.TableCreateDto;
 import raf.rs.reservations.dto.TableDto;
+import raf.rs.reservations.exception.InvalidDataException;
 import raf.rs.reservations.exception.NotFoundException;
 import raf.rs.reservations.repository.AppointmentRepository;
 import raf.rs.reservations.repository.RestaurantRepository;
@@ -45,7 +47,6 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public RestaurantDto createRestaurant(RestaurantCreateDto restaurantCreateDto) {
         final Restaurant restaurant = this.modelMapper.map(restaurantCreateDto, Restaurant.class);
-        System.out.println(restaurant.getId()+" "+restaurant.getManagerId());
         restaurant.setId(null);
         this.restaurantRepository.save(restaurant);
         return this.modelMapper.map(restaurant, RestaurantDto.class);
@@ -64,13 +65,20 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setType(restaurantDto.getType());
         restaurant.setDiscountAfterXReservations(restaurantDto.getDiscountAfterXReservations());
         restaurant.setFreeItemEachXReservations(restaurantDto.getFreeItemEachXReservations());
-        restaurant.setManagerId(restaurantDto.getManagerId());
+
+        if (restaurantDto.getManagerId() != null) {
+            restaurant.setManagerId(restaurantDto.getManagerId());
+        }
 
         return this.modelMapper.map(this.restaurantRepository.save(restaurant), RestaurantDto.class);
     }
 
     @Override
     public AppointmentDto createAppointment(AppointmentCreateDto appointmentCreateDto) {
+        if (appointmentCreateDto.getTime().isBefore(LocalDateTime.now())) {
+            throw new InvalidDataException("Date must be after now");
+        }
+
         final Table table = this.tableRepository
             .findById(appointmentCreateDto.getTableId())
             .orElseThrow(() -> new NotFoundException("Table does not exist"));
